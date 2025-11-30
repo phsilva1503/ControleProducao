@@ -253,11 +253,14 @@ def routes(app):
             producao_id = request.form['producao_id']
             data_producao = request.form.get('data_producao') or date.today().strftime('%Y-%m-%d')
             tipo_espuma_id = int(request.form['tipo_espuma'])
-            densidade_real = float(request.form['densidade_real'])
+            cor = request.form['cor']
             altura = float(request.form.get('altura', 0))
             conformidade = request.form['conformidade']
             observacoes = request.form.get('observacoes', '')
             ficha = FichaTecnica.query.filter_by(tipo_espuma_id=tipo_espuma_id).first()
+            if not ficha:
+                flash("Nenhuma ficha técnica encontrada para este tipo de espuma!", "danger")
+                return redirect(url_for("mostrar_cadastro_producao"))
 
 
 
@@ -268,18 +271,13 @@ def routes(app):
                 flash(f"Número de bloco '{producao_id}' já cadastrado!", "danger")
                 return redirect(url_for("mostrar_cadastro_producao"))
 
-            # Busca a ficha técnica associada ao tipo de espuma
-            #ficha = FichaTecnica.query.filter_by(tipo_espuma_id=tipo_espuma_id).first()
-            #if not ficha:
-             #   flash("Nenhuma ficha técnica encontrada para este tipo de espuma!", "danger")
-              #  return redirect(url_for("mostrar_cadastro_producao"))
 
             # Cria o registro da produção
             nova_producao = Producao(
                 producao_id=producao_id,
                 data_producao=data_producao,
-                tipo_espuma=tipo_espuma_id,
-                densidade_real=densidade_real,
+                tipo_espuma=ficha.tipo_espuma.nome,
+                cor=cor,
                 altura=altura,
                 conformidade=conformidade,
                 observacoes=observacoes

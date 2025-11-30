@@ -140,8 +140,8 @@
 
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="densidade_real" class="form-label">Densidade:</label>
-                                    <input type="number" class="form-control" id="densidade_real" name="densidade_real" step="0.01" required>
+                                    <label for="cor" class="form-label">Cor:</label>
+                                    <input type="text" class="form-control" id="cor" name="cor" required>
                                 </div>
                             </div>
 
@@ -313,7 +313,7 @@
                                         <th scope="col">Bloco</th>
                                         <th scope="col">Data</th>
                                         <th scope="col">Tipo</th>
-                                        <th scope="col">Densidade</th>
+                                        <th scope="col">Cor</th>
                                         <th scope="col">Altura</th>
                                         <th scope="col">Conformidade</th>
                                         <th scope="col">Observações</th>
@@ -327,7 +327,7 @@
                                         <td>{{ producao.producao_id }}</td>
                                         <td>{{ producao.data_producao.strftime('%d/%m/%Y') }}</td>
                                         <td>{{ producao.tipo_espuma }}</td>
-                                        <td>{{ "%.2f"|format(producao.densidade_real)|replace('.', ',') }}</td>
+                                        <td>{{ producao.cor }}</td>
                                         <td>{{ "%.1f"|format(producao.altura)|replace('.', ',') }}</td>
                                         <td>
                                             {% if producao.conformidade == 'Conforme' %}
