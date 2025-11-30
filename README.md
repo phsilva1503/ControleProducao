@@ -18,6 +18,6 @@ Criar uma interface simples e funcional para:
 - JavaScript
 - [Opcional] Integração futura com Java ou Python para lógica e banco de dados
 
-## 📂 Estrutura do Projeto
+
 
 
