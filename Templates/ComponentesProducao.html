@@ -24,11 +24,13 @@
       <p class="mb-2">
         Data: <strong>{{ producao.data_producao.strftime('%d/%m/%Y') }}</strong> | 
         Densidade: <strong>{{ producao.densidade_real }}</strong> kg/m³ | 
-        Altura: <strong>{{ producao.altura }}</strong> cm | 
+        Altura: <strong>{{ producao.altura }}</strong> cm  
         Conformidade: <strong>{{ producao.conformidade }}</strong>
+        
       </p>
       <p class="mb-4">
-        Observações: <strong>{{ producao.observacoes or '-' }}</strong>
+       Tipo Espuma: <strong>{{ producao.tipo_espuma }}</strong> | 
+       Observações: <strong>{{ producao.observacoes or '-' }}</strong>
       </p>
 
       <!-- Tabela de Componentes -->

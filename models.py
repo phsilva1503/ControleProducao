@@ -27,7 +27,6 @@ class Producao(db.Model):
     altura = db.Column(db.Float, nullable=True, default=0.0)
 
     componentes = db.relationship('ComponenteProducao',back_populates='producao',cascade='all, delete-orphan')
-
     def __repr__(self):
         return f"<Producao {self.producao_id}>"
 

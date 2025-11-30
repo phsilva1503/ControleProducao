@@ -352,7 +352,25 @@ def routes(app):
     def ver_componentes_producao(producao_id):
         producao = Producao.query.get_or_404(producao_id)
         componentes = ComponenteProducao.query.filter_by(producao_id=producao_id).all()
-        return render_template('ComponentesProducao.html', producao=producao, componentes=componentes)
+
+        ficha = (
+            FichaTecnica.query
+            .join(TipoEspuma)
+            .filter(TipoEspuma.nome == producao.tipo_espuma)
+            .first()
+        )
+
+        tipo_espuma_nome = ficha.tipo_espuma.nome if ficha else "N/A"
+        tipo_espuma_id   = ficha.tipo_espuma.id if ficha else "N/A"
+
+        return render_template(
+            'ComponentesProducao.html',
+            producao=producao,
+            componentes=componentes,
+            tipo_espuma=tipo_espuma_nome,
+            tipo_espuma_id=tipo_espuma_id
+        )
+
     
     # -----------------------
     # Fichas Técnicas
