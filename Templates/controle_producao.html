@@ -357,7 +357,7 @@
                 </div>
 
                 
-                <div id="tela-Componentes" class="card d-none">
+                <div id="tela-Componentes" class="card ">
                     <div class="card-body">
                         <h4 class="section-title mb-4">
                         <i class="bi bi-tools"></i> Cadastro de Componentes
@@ -478,7 +478,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="tipo_espuma" class="form-label fw-bold">Tipo de Espuma</label>
-                            <select class="form-select" id="tipo_espuma" name="tipo_espuma" required>
+                            <select class="form-select" id="tipo_espuma" name="tipo_espuma_id" required>
                                 <option value="">Selecione...</option>
                                 {% for tipo in tipos_espuma %}
                                     <option value="{{ tipo.id }}">{{ tipo.nome }}</option>

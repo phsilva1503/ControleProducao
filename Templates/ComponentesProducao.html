@@ -33,6 +33,17 @@
        Observações: <strong>{{ producao.observacoes or '-' }}</strong>
       </p>
 
+      <div class="card mt-3">
+          <div class="card-header">
+              <strong>Observações</strong>
+          </div>
+          <div class="card-body">
+              <p class="mb-0" style="white-space: pre-wrap;">
+                  {{ producao.observacoes or 'Nenhuma observação registrada.' }}
+              </p>
+          </div>
+      </div>
+
       <!-- Tabela de Componentes -->
       <div class="overflow-x-auto">
         <table class="min-w-full border border-gray-200 rounded-lg">

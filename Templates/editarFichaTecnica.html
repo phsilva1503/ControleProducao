@@ -11,17 +11,19 @@
 
     <form method="POST">
         <!-- Tipo de Espuma -->
-        <div class="mb-3">
-            <label class="form-label">Tipo de Espuma</label>
+<div class="mb-3">
+    <label class="form-label">Tipo de Espuma</label>
 
-            <input 
-                type="text" 
-                class="form-control bg-light "
-                id="tipo_espuma"
-                name="tipo_espuma"
-                value="{{ ficha.tipo_espuma.nome }}"
-            >
-        </div>
+    <select name="tipo_espuma_id" class="form-select">
+            {% for tipo in tipos_espuma %}
+                <option value="{{ tipo.id }}"
+                    {% if tipo.id == ficha.tipo_espuma_id %}selected{% endif %}>
+                    {{ tipo.nome }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
 
         <!-- Descrição -->
         <div class="mb-3">
