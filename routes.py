@@ -3,6 +3,8 @@ from models import *
 from datetime import date, datetime
 from sqlalchemy import func, case,distinct
 from flask import jsonify
+from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 ##from models import Componente, Estoque, Movimentacao, Producao, ComponenteProducao
 
@@ -68,6 +70,7 @@ def routes(app):
     # Rota inicial
     # -----------------------
     @app.route('/')
+    @login_required
     def index():
         return render_template('index-main.html')
 
@@ -189,6 +192,7 @@ def routes(app):
     # Controle de Produção
     # -----------------------
     @app.route('/controle-producao')
+    @login_required
     def controle_producao():
         ##producoes = Producao.query.all()
         producoes = Producao.query.order_by(Producao.id.desc()).all()
@@ -280,7 +284,8 @@ def routes(app):
                 cor=cor,
                 altura=altura,
                 conformidade=conformidade,
-                observacoes=observacoes
+                observacoes=observacoes,
+                usuario_id=current_user.id
             )
             db.session.add(nova_producao)
             db.session.flush()  # Pega o ID antes do commit
@@ -538,6 +543,34 @@ def routes(app):
 
         espumas = TipoEspuma.query.order_by(TipoEspuma.nome).all()
         return render_template('cadastroTipoEspuma.html', espumas=espumas)
+    
+
+    #--------------------
+    #rota de login
+    #------------------
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            email = request.form.get('email')
+            senha = request.form.get('senha')
+
+            usuario = Usuario.query.filter_by(email=email, ativo=True).first()
+
+            if usuario and usuario.check_senha(senha):
+                login_user(usuario)
+                return redirect(url_for('index'))
+            else:
+                flash("Usuário ou senha inválidos", "danger")
+                return render_template("login.html")
+
+        return render_template("login.html")
+
+    @app.route('/logout')
+    @login_required
+    def logout():
+        logout_user()
+        flash("Logout realizado com sucesso!", "info")
+        return redirect(url_for('login'))
 
 
 

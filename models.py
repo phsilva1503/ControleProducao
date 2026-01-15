@@ -1,8 +1,13 @@
 # models.py
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+from flask_bcrypt import Bcrypt
+
 
 db = SQLAlchemy()
+bcrypt = Bcrypt()
 
 class Componente(db.Model):
     __tablename__ = "componente"
@@ -25,6 +30,11 @@ class Producao(db.Model):
     conformidade = db.Column(db.String(20), nullable=False)
     observacoes = db.Column(db.Text)
     altura = db.Column(db.Float, nullable=True, default=0.0)
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"), nullable=False)
+
+    usuario = db.relationship("Usuario", back_populates="producoes")
+
+    componentes = db.relationship('ComponenteProducao',back_populates='producao',cascade='all, delete-orphan')
 
     componentes = db.relationship('ComponenteProducao',back_populates='producao',cascade='all, delete-orphan')
     def __repr__(self):
@@ -108,7 +118,30 @@ class FichaTecnicaComponente(db.Model):
 
     def __repr__(self):
         return f"<FichaTecnicaComponente FichaTecnicaID={self.ficha_tecnica_id}, ComponenteID={self.componente_id}>"
+    
 
 
-__all__ = ["db", "Componente", "Producao", "ComponenteProducao", "Movimentacao", "Estoque", "FichaTecnica", "FichaTecnicaComponente", "TipoEspuma"]
+class Usuario(db.Model, UserMixin):
+    __tablename__ = "usuario"
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    senha_hash = db.Column(db.String(255), nullable=False)
+    ativo = db.Column(db.Boolean, default=True)
+
+    producoes = db.relationship("Producao", back_populates="usuario")
+
+    def set_senha(self, senha):
+        self.senha_hash = generate_password_hash(senha)
+
+    def check_senha(self, senha):
+        return check_password_hash(self.senha_hash, senha)
+
+    def __repr__(self):
+        return f"<Usuario {self.email}>"
+
+
+
+__all__ = ["db", "Componente", "Producao", "ComponenteProducao", "Movimentacao", "Estoque", "FichaTecnica", "FichaTecnicaComponente", "TipoEspuma", "Usuario"]
 
