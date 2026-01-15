@@ -1,0 +1,60 @@
+[33mcommit 2bdbb25ad638913138fd2984b5c8500d3d6f4157[m
+Author: phsilva1503 <phsilva1@outlook.com.br>
+Date:   Thu Jan 15 05:34:03 2026 -0300
+
+    Remove arquivos de cache e banco local do versionamento
+
+[33mcommit 9c54ad378093a848b1cb741e4f0bc1142fd78f6a[m[33m ([m[1;35mrefs/stash[m[33m)[m
+Merge: c99a6f0 5b950a5 49b4402
+Author: phsilva1503 <phsilva1@outlook.com.br>
+Date:   Thu Jan 15 05:24:46 2026 -0300
+
+    On main: ttt
+
+[33mcommit 1992428c334dc4bf29c463be816ecca3ef9a02d6[m
+Author: phsilva1503 <phsilva1@outlook.com.br>
+Date:   Thu Jan 15 05:05:10 2026 -0300
+
+    ajuste
+
+[33mcommit 3444c0d85c91fd7172c4a6829db87ec5772efa44[m
+Author: phsilva1503 <phsilva1@outlook.com.br>
+Date:   Thu Jan 15 05:04:39 2026 -0300
+
+    Remove arquivos temporários e banco local
+
+[33mcommit bfbc1b4b3f7ce4fe3f54278fb55804a4d5e4698d[m
+Author: phsilva1503 <phsilva1@outlook.com.br>
+Date:   Thu Jan 15 04:52:07 2026 -0300
+
+    Tabela Usuario e função login/logout ok
+
+[33mcommit 507192e07794a52e22330cca1b89260da74cf125[m[33m ([m[1;31morigin/AJUSTE-ROTA-CADASTRO-FICHA-TECNICA[m[33m, [m[1;32mAJUSTE-ROTA-CADASTRO-FICHA-TECNICA[m[33m)[m
+Author: phsilva1503 <phsilva1@outlook.com.br>
+Date:   Sun Jan 11 12:08:10 2026 -0300
+
+    Ajustada a rota de cadastro de ficha técnica
+
+[33mcommit 79f1cc950295cadcf9f990d2e4fca5ba7f9e56c5[m
+Author: phsilva1503 <phsilva1@outlook.com.br>
+Date:   Sun Nov 30 19:38:12 2025 -0300
+
+    Adicionar tipo de espuma na exibição de componentes de produção e remover linha em branco desnecessária
+
+[33mcommit 963f1fbcc03bb16e40d5ce2fa917df5c2182a8e8[m[33m ([m[1;31morigin/AjusteColunaCor[m[33m, [m[1;32mAjusteColunaCor[m[33m)[m
+Author: phsilva1503 <phsilva1@outlook.com.br>
+Date:   Sun Nov 30 18:16:16 2025 -0300
+
+    Renomear coluna 'densidade_real' para 'cor' na tabela de produção e atualizar os formulários correspondentes
+
+[33mcommit 70c96743e61a8531dcc847943b2ce33e5edc7381[m
+Author: phsilva1503 <phsilva1@outlook.com.br>
+Date:   Sun Nov 30 11:48:34 2025 -0300
+
+    Adicionar funcionalidade de edição para tipos de espuma
+
+[33mcommit 975db8f22c92714bf8f83f78b00d7fb83db1621b[m
+Author: phsilva1503 <phsilva1@outlook.com.br>
+Date:   Sun Nov 30 10:53:01 2025 -0300
+
+    primeiro commit
