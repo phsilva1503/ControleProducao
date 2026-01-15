@@ -1,4 +1,55 @@
 # Virtual environment
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ========================
+# Ambiente virtual
+# ========================
+venv/
+env/
+.venv/
+
+# ========================
+# Flask / SQLite
+# ========================
+instance/
+*.db
+*.sqlite3
+
+# ========================
+# Cache / Temporários
+# ========================
+.cache/
+.pytest_cache/
+.mypy_cache/
+
+# ========================
+# Logs
+# ========================
+*.log
+
+# ========================
+# Sistema operacional
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# VS Code
+# ========================
+.vscode/
+
+# ========================
+# Build / Distribuição
+# ========================
+build/
+dist/
+*.egg-info/
+
 venv/
 ENV/
 env/
