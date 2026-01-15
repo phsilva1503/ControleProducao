@@ -33,7 +33,7 @@ instance/
 *.log
 
 # ========================
-# Sistema operacional
+# Sistema operacional retirado
 # ========================
 .DS_Store
 Thumbs.db
