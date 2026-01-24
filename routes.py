@@ -512,7 +512,7 @@ def routes(app):
                 return redirect(url_for('cadastrar_tipo_espuma'))
 
             espumas = TipoEspuma.query.order_by(TipoEspuma.nome).all()
-            return render_template('cadastroTipoEspuma.html', espumas=espumas)
+            return render_template('CadastroTipoEspuma.html', espumas=espumas)
     
     # -----------------------
     # Rota AJAX: AQUI GERA UM JSON COM OS COMPOENTES DA FIICHA E MANDA PARA O FRONT 
