@@ -592,6 +592,42 @@ def routes(app):
         return redirect(url_for('login'))
 
 
+    # -----------------------
+    # Cadastro de Usuário
+    # -----------------------
+    @app.route('/cadastro_usuario', methods=['GET', 'POST'], endpoint='cadastro_usuario')
+    def cadastro_usuario():
+        if request.method == 'POST':
+            nome = request.form.get('nome', '').strip()
+            email = request.form.get('email', '').strip()
+            senha = request.form.get('senha', '').strip()
+            confirmar_senha = request.form.get('confirmar_senha', '').strip()
+
+        # Validações básicas
+            if not nome or not email or not senha:
+                flash("Preencha todos os campos!", "danger")
+                return render_template('cadastroUsuario.html', nome=nome, email=email)
+
+            if senha != confirmar_senha:
+                flash("As senhas não conferem!", "danger")
+                return render_template('cadastroUsuario.html', nome=nome, email=email)
+
+        # Verifica se o e-mail já está cadastrado
+            if Usuario.query.filter_by(email=email).first():
+                flash("Este e-mail já está cadastrado!", "warning")
+                return render_template('cadastroUsuario.html', nome=nome)
+
+        # Cria o usuário
+            novo_usuario = Usuario(nome=nome, email=email)
+            novo_usuario.set_senha(senha)
+            db.session.add(novo_usuario)
+            db.session.commit()
+
+            flash(f"Usuário '{nome}' cadastrado com sucesso!", "success")
+            return redirect(url_for('login'))
+
+        return render_template('cadastroUsuario.html')
+
 
 
     # -----------------------
