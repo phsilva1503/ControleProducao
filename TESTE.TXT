@@ -4,3 +4,5 @@ TESTE NOVA BRANCH TesteBranch
 ajuste PR
 
 correção pull
+
+ajustado gunicorn
