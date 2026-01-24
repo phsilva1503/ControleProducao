@@ -397,60 +397,52 @@ def routes(app):
     # POST → processa o cadastro e volta para a mesma página
     @app.route('/ficha-tecnica', methods=['GET', 'POST'], endpoint='cadastrar_ficha_tecnica')
     def cadastrar_ficha_tecnica():
-            componentes = Componente.query.filter_by(ativo=True).all()
-            tipos_espuma = TipoEspuma.query.all()
+        componentes = Componente.query.filter_by(ativo=True).all()
+        tipos_espuma = TipoEspuma.query.all()
 
-            # ---------------------
-            #       POST
-            # ---------------------
-            if request.method == 'POST':
-                print(request.form)
-                tipo_espuma_id = request.form.get('tipo_espuma')
-                descricao = request.form.get('descricao', '')
+        # ---------------------
+        #       POST
+        # ---------------------
+        if request.method == 'POST':
+            tipo_espuma_id = request.form.get('tipo_espuma_id')
+            descricao = request.form.get('descricao', '')
 
-                if not tipo_espuma_id:
-                    flash("Informe o tipo de espuma!", "danger")
-                    return redirect(url_for('cadastrar_ficha_tecnica'))
+            if not tipo_espuma_id:
+                flash("Informe o tipo de espuma!", "danger")
+                return redirect(url_for('cadastrar_ficha_tecnica'))
 
-                try:
-                    tipo_espuma_id_int = int(tipo_espuma_id)
-                except ValueError:
-                    flash("Valor inválido para tipo de espuma!", "danger")
-                    return redirect(url_for('cadastrar_ficha_tecnica'))
+            tipo_espuma_id_int = int(tipo_espuma_id)
 
-                # Evita duplicidade
-                if FichaTecnica.query.filter_by(tipo_espuma_id=tipo_espuma_id_int).first():
-                    tipo_nome = TipoEspuma.query.get(tipo_espuma_id_int).nome
-                    flash(f"Já existe uma ficha técnica para '{tipo_nome}'.", "warning")
-                    return redirect(url_for('cadastrar_ficha_tecnica'))
+            if FichaTecnica.query.filter_by(tipo_espuma_id=tipo_espuma_id_int).first():
+                flash("Já existe uma ficha técnica para este tipo de espuma!", "warning")
+                return redirect(url_for('cadastrar_ficha_tecnica'))
 
-                ficha = FichaTecnica(tipo_espuma_id=tipo_espuma_id_int, descricao=descricao)
-                db.session.add(ficha)
-                db.session.flush()
+            ficha = FichaTecnica(tipo_espuma_id=tipo_espuma_id_int, descricao=descricao)
+            db.session.add(ficha)
+            db.session.flush()
 
-                for componente in componentes:
-                    if request.form.get(f"componente_{componente.id}"):
-                        db.session.add(
-                            FichaTecnicaComponente(
-                                ficha_tecnica_id=ficha.id,
-                                componente_id=componente.id
-                            )
-                        )
+            # ✅ Aqui pegamos todos os componentes selecionados
+            componentes_selecionados = request.form.getlist('componentes_ids')
+            for componente_id in componentes_selecionados:
+                db.session.add(
+                    FichaTecnicaComponente(
+                        ficha_tecnica_id=ficha.id,
+                        componente_id=int(componente_id)
+                    )
+                )
 
-                db.session.commit()
+            db.session.commit()
+            flash(f"Ficha técnica '{TipoEspuma.query.get(tipo_espuma_id_int).nome}' criada com sucesso!", "success")
+            return redirect(url_for('mostrar_ficha_tecnica'))
 
-                tipo_nome = TipoEspuma.query.get(tipo_espuma_id_int).nome
-                flash(f"Ficha técnica '{tipo_nome}' criada com sucesso!", "success")
-                return redirect(url_for('mostrar_ficha_tecnica'))
-
-            # ---------------------
-            #       GET
-            # ---------------------
-            return render_template(
-                "ficha_tecnica/cadastrar.html",
-                componentes=componentes,
-                tipos_espuma=tipos_espuma
-            )
+        # ---------------------
+        #       GET
+        # ---------------------
+        return render_template(
+            "ficha_tecnica/cadastrar.html",
+            componentes=componentes,
+            tipos_espuma=tipos_espuma
+        )
 
         
 
@@ -462,7 +454,7 @@ def routes(app):
 
             if request.method == 'POST':
                 # Valores enviados pelo formulário
-                tipo_espuma_id = request.form.get('tipo_espuma')
+                tipo_espuma_id = request.form.get('tipo_espuma_id')
                 descricao = request.form.get('descricao', '')
 
                 try:

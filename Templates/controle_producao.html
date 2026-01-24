@@ -483,7 +483,9 @@
                             <select class="form-select" id="tipo_espuma" name="tipo_espuma_id" required>
                                 <option value="">Selecione...</option>
                                 {% for tipo in tipos_espuma %}
-                                    <option value="{{ tipo.id }}">{{ tipo.nome }}</option>
+                                    <option value="{{ tipo.id }}" {% if request.form.get('tipo_espuma_id') == tipo.id|string %}selected{% endif %}>
+                                        {{ tipo.nome }}
+                                    </option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -496,9 +498,10 @@
                         {% for componente in componentes %}
                         <div class="col-md-4 mb-2">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox"
-                                       id="componente_{{ componente.id }}"
-                                       name="componente_{{ componente.id }}">
+                                <input  class="form-check-input" type="checkbox"
+                                        id="componente_{{ componente.id }}"
+                                        name="componentes_ids"
+                                        value="{{ componente.id }}">
                                 <label class="form-check-label" for="componente_{{ componente.id }}">
                                     {{ componente.nome }}
                                 </label>
