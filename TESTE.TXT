@@ -6,3 +6,5 @@ ajuste PR
 correção pull
 
 ajustado gunicorn
+
+ajuste de merge 
