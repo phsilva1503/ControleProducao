@@ -539,13 +539,13 @@ def routes(app):
         if not nova_nome:
             flash("Informe o novo nome da espuma!", "danger")
             espumas = TipoEspuma.query.order_by(TipoEspuma.nome).all()
-            return render_template('cadastroTipoEspuma.html', espumas=espumas)
+            return render_template('CadastroTipoEspuma.html', espumas=espumas)
 
         # Verifica duplicidade
         if TipoEspuma.query.filter(TipoEspuma.nome == nova_nome, TipoEspuma.id != id).first():
             flash("Já existe um tipo de espuma com esse nome!", "warning")
             espumas = TipoEspuma.query.order_by(TipoEspuma.nome).all()
-            return render_template('cadastroTipoEspuma.html', espumas=espumas)
+            return render_template('CadastroTipoEspuma.html', espumas=espumas)
 
         espuma = TipoEspuma.query.get_or_404(id)
         espuma.nome = nova_nome
@@ -553,7 +553,7 @@ def routes(app):
         flash(f"Tipo de espuma atualizado para '{nova_nome}' com sucesso!", "success")
 
         espumas = TipoEspuma.query.order_by(TipoEspuma.nome).all()
-        return render_template('cadastroTipoEspuma.html', espumas=espumas)
+        return render_template('CadastroTipoEspuma.html', espumas=espumas)
     
 
     #--------------------
