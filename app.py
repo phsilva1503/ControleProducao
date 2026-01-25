@@ -18,13 +18,20 @@ app = Flask(__name__, template_folder=template_dir)
 
 # 🔹 Configuração do banco (LOCAL x RENDER)
 if os.environ.get("RENDER"):
-    os.makedirs("/data", exist_ok=True)
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////data/producao.db"
+    # Caminho do volume persistente
+    volume_path = "/mnt/data"
+    os.makedirs(volume_path, exist_ok=True)
+    db_path = os.path.join(volume_path, "producao.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///producao.db"
+    # Banco local para desenvolvimento
+    instance_path = os.path.join(base_dir, "instance")
+    os.makedirs(instance_path, exist_ok=True)
+    db_path = os.path.join(instance_path, "producao.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = "123"  # Em produção, use variável de ambiente
+app.config["SECRET_KEY"] = "123"  # Em produção, use variável de ambiente segura
 
 # -----------------------
 # EXTENSÕES
@@ -45,7 +52,7 @@ def load_user(user_id):
 # -----------------------
 with app.app_context():
     db.create_all()
-    print("✅ Banco criado/verificado com sucesso!")
+    print(f"✅ Banco criado/verificado em: {db_path}")
 
 # -----------------------
 # ROTAS
@@ -57,4 +64,3 @@ routes(app)
 # -----------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-#----------
