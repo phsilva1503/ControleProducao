@@ -4,22 +4,72 @@
     <meta charset="UTF-8">
     <title>Movimentações - {{ componente.nome }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f3f7fb;
+        }
+
+        .page-title {
+            font-weight: 600;
+            color: #0d47a1;
+        }
+
+        .card-custom {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .btn-secondary {
+            border-radius: 10px;
+        }
+
+        table {
+            border-radius: 12px !important;
+            overflow: hidden;
+        }
+
+        thead.table-header {
+            background: #0d47a1 !important;
+            color: white;
+        }
+
+        .badge {
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 8px;
         }
     </style>
 </head>
-<body>
-    <div class="container mt-5">
-        <h2 class="mb-4">Movimentações do Componente: <strong>{{ componente.nome }}</strong></h2>
 
-        <a href="{{ url_for('controle_producao') }}" class="btn btn-secondary mb-3">Voltar ao Estoque</a>
+<body>
+
+<div class="container mt-4">
+
+    <h2 class="page-title mb-4">
+        <i class="bi bi-box-seam"></i>
+        Movimentações do Componente: <strong>{{ componente.nome }}</strong>
+    </h2>
+
+    <!-- BOTÃO VOLTAR AUTOMÁTICO -->
+    <div class="mb-3">
+        <button class="btn btn-secondary" onclick="history.back()">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </button>
+    </div>
+
+    <div class="card-custom">
 
         {% if movimentacoes %}
-            <table class="table table-striped table-bordered">
-                <thead class="table-dark">
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-header">
                     <tr>
                         <th>ID</th>
                         <th>Tipo</th>
@@ -32,29 +82,38 @@
                     {% for mov in movimentacoes %}
                     <tr>
                         <td>{{ mov.id }}</td>
+
                         <td>
                             {% if mov.tipo == 'entrada' %}
                                 <span class="badge bg-success">Entrada</span>
                             {% elif mov.tipo == 'saida' %}
                                 <span class="badge bg-danger">Saída</span>
                             {% else %}
-                                {{ mov.tipo|capitalize }}
+                                <span class="badge bg-secondary">{{ mov.tipo|capitalize }}</span>
                             {% endif %}
                         </td>
+
                         <td>{{ "%.2f"|format(mov.quantidade)|replace('.', ',') }}</td>
+
                         <td>{{ mov.data.strftime('%d/%m/%Y') if mov.data else '-' }}</td>
+
                         <td>{{ mov.producao_id if mov.producao_id else '-' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
         {% else %}
             <div class="alert alert-info">
                 <i class="bi bi-info-circle"></i> Nenhuma movimentação registrada para este componente.
             </div>
         {% endif %}
+
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
