@@ -74,7 +74,9 @@ h1, h2, h3 {
 # ================================================================
 # BANCO DE DADOS
 # ================================================================
-DB_PATH = "instance/producao.db"
+import os
+base_dir = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(base_dir, "instance", "producao.db")
 
 if not os.path.exists(DB_PATH):
     st.error(f"❌ Banco de dados não encontrado em: `{DB_PATH}`")

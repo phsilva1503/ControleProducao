@@ -37,6 +37,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('analise_preditiva') }}">Análise Preditiva</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -56,7 +59,7 @@
                         <!-- Menu item for technical data sheet registration -->
                         <div class="menu-item" onclick="mostrarTela('fichaTecnica')">
                             <i class="bi bi-clipboard-data"></i> Cadastro de Ficha Técnica
-                        </div>
+                        </div> 
 
                         <div class="menu-item active" onclick="mostrarTela('cadastro')">
                             <i class="bi bi-file-earmark-text"></i> Cadastro de Produção
@@ -73,18 +76,23 @@
                         <div class="menu-item" onclick="mostrarTela('estoque')">
                             <i class="bi bi-box-seam"></i> Estoque Atual
                         </div>
+                        
+                        <!-- Histórico e Gráficos - Link para Streamlit Cloud -->
                         <a class="menu-item text-decoration-none d-flex align-items-center" 
-                        href="https://dashboard-plataforma-err6cvzmsqkadji2bh7b75.streamlit.app/" 
-                        rel="noopener noreferrer"
-                        target="_blank" 
-                        style="color: inherit; padding: 8px 12px; border-radius: 4px;"
-                        onmouseover="this.style.backgroundColor='#f8f9fa'"
-                        onmouseout="this.style.backgroundColor='transparent'">
-                        <i class="bi bi-graph-up me-2"></i> Histórico e Gráficos
+                           href="https://dashboard-plataforma-err6cvzmsqkadji2bh7b75.streamlit.app/" 
+                           rel="noopener noreferrer"
+                           target="_blank" 
+                           style="color: inherit; padding: 8px 12px; border-radius: 4px;"
+                           onmouseover="this.style.backgroundColor='#f8f9fa'"
+                           onmouseout="this.style.backgroundColor='transparent'">
+                            <i class="bi bi-graph-up me-2"></i> Histórico e Gráficos
                         </a>
+                        
+                        <!-- Fórmulas Químicas - Link para tela interna -->
                         <div class="menu-item" onclick="mostrarTela('formulas')">
                             <i class="bi bi-journal-text"></i> Fórmulas Químicas
                         </div>
+                        
                         <hr class="my-4">
                         <h5 class="section-title">
                             <i class="bi bi-info-circle"></i> Informações Técnicas
@@ -108,10 +116,10 @@
                         {% with messages = get_flashed_messages(with_categories=true) %}
                             {% if messages %}
                                 {% for category, message in messages %}
-                                    <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
-                                        {{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                                    </div>
+                                <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                                </div>
                                 {% endfor %}
                             {% endif %}
                         {% endwith %}
@@ -140,8 +148,8 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="densidade_real" class="form-label">Densidade:</label>
-                                    <input type="number" class="form-control" id="densidade_real" name="densidade_real" step="0.01" required>
+                                    <label for="cor" class="form-label">Cor:</label>
+                                    <input type="text" class="form-control" id="cor" name="cor" required>
                                 </div>
                             </div>
 
@@ -174,21 +182,21 @@
                                 </label>
                                 <textarea class="form-control" id="observacoes" name="observacoes" rows="3"></textarea>
                             </div>
-
+                            
                             <h5 class="section-title mt-4">
                                 <i class="bi bi-flask"></i> Quantidade de Produtos Usados (em kg)
                             </h5>
-
+                            
                             <!-- container que será preenchido dinamicamente -->
                             <div id="lista_componentes" class="row g-3">
                                 <script>
-                                    document.addEventListener("DOMContentLoaded", function () {
+                                    document.addEventListener("DOMContentLoaded", function() {
                                         const selectTipo = document.getElementById("tipo_espuma");
                                         const listaComponentes = document.getElementById("lista_componentes");
 
                                         async function carregarComponentes(tipoId) {
                                             if (!tipoId) {
-                                                listaComponentes.innerHTML = ""; // limpa se não selecionar nada
+                                                listaComponentes.innerHTML = "";
                                                 return;
                                             }
 
@@ -197,10 +205,8 @@
                                                 if (!res.ok) throw new Error("Erro ao buscar componentes");
                                                 const componentes = await res.json();
 
-                                                // limpar
                                                 listaComponentes.innerHTML = "";
 
-                                                // gerar inputs — colocamos value=0 por padrão
                                                 componentes.forEach(c => {
                                                     const html = `
                                                     <div class="col-md-4 componente-item" data-componente-id="${c.id}">
@@ -212,17 +218,15 @@
 
                                             } catch (err) {
                                                 console.error(err);
-                                                // opcional: mostrar mensagem visual ao usuário
                                             }
                                         }
 
-                                        // carregar componentes se já existir um valor selecionado
                                         if (selectTipo && selectTipo.value) {
                                             carregarComponentes(selectTipo.value);
                                         }
 
                                         if (selectTipo) {
-                                            selectTipo.addEventListener("change", function () {
+                                            selectTipo.addEventListener("change", function() {
                                                 carregarComponentes(this.value);
                                             });
                                         }
@@ -295,11 +299,12 @@
                                             <th scope="col">Bloco</th>
                                             <th scope="col">Data</th>
                                             <th scope="col">Tipo</th>
-                                            <th scope="col">Densidade</th>
+                                            <th scope="col">Cor</th>
                                             <th scope="col">Altura</th>
                                             <th scope="col">Conformidade</th>
                                             <th scope="col">Observações</th>
                                             <th scope="col" class="text-center">Ações</th>
+                                            <th scope="col">Usuário</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -309,7 +314,7 @@
                                                 <td>{{ producao.producao_id }}</td>
                                                 <td>{{ producao.data_producao.strftime('%d/%m/%Y') }}</td>
                                                 <td>{{ producao.tipo_espuma }}</td>
-                                                <td>{{ "%.2f"|format(producao.densidade_real)|replace('.', ',') }}</td>
+                                                <td>{{ producao.cor }}</td>
                                                 <td>{{ "%.1f"|format(producao.altura)|replace('.', ',') }}</td>
                                                 <td>
                                                     {% if producao.conformidade == 'Conforme' %}
@@ -325,6 +330,7 @@
                                                         <i class="bi bi-archive"></i>
                                                     </a>
                                                 </td>
+                                                <td>{{ producao.usuario_id }}</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -398,19 +404,19 @@
                                                 <td>
                                                     {% if componente.ativo %}
                                                         <a href="{{ url_for('toggle_componente', componente_id=componente.id) }}" 
-                                                            class="badge rounded-pill bg-success text-decoration-none px-3 py-2">
+                                                           class="badge rounded-pill bg-success text-decoration-none px-3 py-2">
                                                             Ativo
                                                         </a>
                                                     {% else %}
                                                         <a href="{{ url_for('toggle_componente', componente_id=componente.id) }}" 
-                                                            class="badge rounded-pill bg-secondary text-decoration-none px-3 py-2">
+                                                           class="badge rounded-pill bg-secondary text-decoration-none px-3 py-2">
                                                             Inativo
                                                         </a>
                                                     {% endif %}
                                                 </td>
                                                 <td>
                                                     <a href="{{ url_for('movimentacoes', componente_id=componente.id) }}" 
-                                                    class="btn btn-sm btn-primary mb-1">
+                                                       class="btn btn-sm btn-primary mb-1">
                                                         <i class="bi bi-arrow-repeat"></i> Movimentações
                                                     </a>
                                                 </td>
@@ -434,16 +440,16 @@
 
                         <!-- Formulário de cadastro -->
                         <div class="card shadow-sm">
-                          <div class="card-header text-white d-flex align-items-center" style="background-color: #003580;">
-                               <!-- Container para centralizar o título -->
-                               <div class="flex-grow-1 text-center">
+                            <div class="card-header text-white d-flex align-items-center" style="background-color: #003580;">
+                                <!-- Container para centralizar o título -->
+                                <div class="flex-grow-1 text-center">
                                     <h4 class="mb-0"><i class="bi bi-clipboard-data"></i> Cadastro de Ficha Técnica</h4>
-                               </div>
-                               <!-- Botão à direita -->
-                               <a href="{{ url_for('index') }}" class="btn btn-light btn-sm ms-2">
-                                  <i class="bi bi-arrow-left-circle"></i> Voltar
-                               </a>
-                        </div>
+                                </div>
+                                <!-- Botão à direita -->
+                                <a href="{{ url_for('index') }}" class="btn btn-light btn-sm ms-2">
+                                    <i class="bi bi-arrow-left-circle"></i> Voltar
+                                </a>
+                            </div>
                             <div class="d-flex justify-content-end mb-3" style="margin-top: 15px; margin-right: 15px;">
                                 <a href="{{ url_for('cadastrar_tipo_espuma') }}" class="btn btn-outline-success">
                                     <i class="bi bi-plus-circle"></i> Cadastrar Tipo de Espuma
@@ -558,17 +564,107 @@
                     </div>
                 </div>
 
-                <!-- Telas futuras (placeholders) - CORRIGI -->
+                <!-- Tela: Histórico e Gráficos (placeholder - agora é link externo) -->
                 <div id="tela-historico" class="card d-none">
                     <div class="card-body">
                         <h4 class="section-title"><i class="bi bi-graph-up"></i> Histórico e Gráficos</h4>
                         <p class="text-muted">Funcionalidade em desenvolvimento.</p>
                     </div>
                 </div>
+
+                <!-- Tela: Fórmulas Químicas - Versão completa -->
                 <div id="tela-formulas" class="card d-none">
                     <div class="card-body">
-                        <h4 class="section-title"><i class="bi bi-journal-text"></i> Fórmulas Químicas</h4>
-                        <p class="text-muted">Funcionalidade em desenvolvimento.</p>
+                        <h4 class="section-title mb-4">
+                            <i class="bi bi-journal-text"></i> Fórmulas Químicas - BonSono
+                        </h4>
+
+                        <!-- Card principal com acesso ao Drive -->
+                        <div class="card shadow-sm border-0 mb-4" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                            <div class="card-body p-4 text-center">
+                                <div class="mb-3">
+                                    <i class="bi bi-google display-1 text-danger"></i>
+                                </div>
+                                <h5 class="card-title fw-bold mb-2 text-primary">
+                                    Repositório Corporativo de Fórmulas
+                                </h5>
+                                <p class="card-text text-muted mb-4">
+                                    Acesso centralizado a todas as fórmulas químicas, proporções e documentação técnica da BonSono
+                                </p>
+                                
+                                <a href="https://drive.google.com/drive/u/1/folders/1Dzdbxy5PuWwfIsf0-UeBedWnzwhjPxnd"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="btn btn-danger btn-lg px-5 py-3 fw-bold shadow">
+                                    <i class="bi bi-folder2-open me-2"></i> Acessar Google Drive
+                                </a>
+                                
+                                <div class="mt-3 text-muted small">
+                                    <i class="bi bi-lock-fill"></i> Acesso restrito a colaboradores autorizados
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documentos disponíveis -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0 fw-bold"><i class="bi bi-file-earmark-text me-2"></i> Conteúdo Disponível</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-check-circle-fill text-success mt-1 me-2"></i>
+                                            <div>Fórmulas padrão (D23, D28, D33)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-check-circle-fill text-success mt-1 me-2"></i>
+                                            <div>Fórmulas especiais (Soft, HR, Memory)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-check-circle-fill text-success mt-1 me-2"></i>
+                                            <div>Tabelas de proporção por densidade</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-check-circle-fill text-success mt-1 me-2"></i>
+                                            <div>Manuais técnicos e MSDS</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dica de segurança -->
+                        <div class="alert alert-warning border-warning mb-4">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2 mt-1"></i>
+                                <div>
+                                    <strong>Atenção:</strong> Sempre utilize as versões mais recentes das fórmulas. 
+                                    Consulte o responsável técnico antes de qualquer alteração nos parâmetros de produção.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Instruções de acesso -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0 fw-bold"><i class="bi bi-question-circle me-2"></i> Como Acessar</h6>
+                            </div>
+                            <div class="card-body">
+                                <ol class="mb-0 ps-3">
+                                    <li>Clique no botão <strong>"Acessar Google Drive"</strong> acima</li>
+                                    <li>Faça login com sua conta corporativa BonSono (@bonsomo.com.br)</li>
+                                    <li>Navegue pelas pastas organizadas por tipo de espuma</li>
+                                    <li>Para download: clique com botão direito → "Fazer download"</li>
+                                </ol>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div> <!-- Fecha .col-md-9 -->
