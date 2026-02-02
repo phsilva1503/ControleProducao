@@ -1,6 +1,6 @@
 # ================================================================
 # Dashboard Profissional – Estilo Corporativo Azul – BonSono
-# COM CONSUMO DE PRODUTOS QUÍMICOS
+# COM CONSUMO DE PRODUTOS QUÍMICOS + CORREÇÃO DE TIPOS DE ESPUMA
 # ================================================================
 
 import streamlit as st
@@ -17,7 +17,6 @@ st.set_page_config(
     page_icon="📊",
     layout="wide"
 )
-
 
 # ================================================================
 # ESTILO GLOBAL – PALETA AZUL PREMIUM
@@ -81,6 +80,41 @@ if not os.path.exists(DB_PATH):
     st.error(f"❌ Banco de dados não encontrado em: `{DB_PATH}`")
     st.stop()
 
+# ✅ FUNÇÃO PARA CARREGAR O MAPEAMENTO ID -> NOME DOS TIPOS DE ESPUMA
+@st.cache_data(ttl=3600)
+def get_tipo_espuma_map():
+    """Retorna dicionário mapeando ID (como string) -> Nome dos tipos de espuma."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        
+        # 🔍 Detectar nome correto da tabela (flexível)
+        tabelas_query = "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%tipo%espuma%' OR name LIKE '%tipo_espuma%'"
+        tabelas = pd.read_sql_query(tabelas_query, conn)
+        
+        if tabelas.empty:
+            # Tentar nomes comuns
+            nomes_possiveis = ['tipo_espuma', 'tipos_espuma', 'tipoespuma', 'tipos']
+            for nome in nomes_possiveis:
+                try:
+                    df_tipos = pd.read_sql_query(f"SELECT id, nome FROM {nome}", conn)
+                    conn.close()
+                    return {str(row['id']): row['nome'] for _, row in df_tipos.iterrows()}
+                except:
+                    continue
+            conn.close()
+            return {}
+        
+        nome_tabela = tabelas.iloc[0]['name']
+        df_tipos = pd.read_sql_query(f"SELECT id, nome FROM {nome_tabela}", conn)
+        conn.close()
+        
+        return {str(row['id']): row['nome'] for _, row in df_tipos.iterrows()}
+    
+    except Exception as e:
+        st.warning(f"⚠️ Erro ao carregar tipos de espuma: {e}")
+        return {}
+
+# ✅ FUNÇÃO PRINCIPAL DE CARREGAMENTO DE DADOS (SEM JOIN PROBLEMÁTICO)
 @st.cache_data(ttl=60)
 def load_producoes_com_consumo():
     conn = sqlite3.connect(DB_PATH)
@@ -89,7 +123,7 @@ def load_producoes_com_consumo():
         p.id AS producao_id_interno,
         p.producao_id AS bloco,
         p.data_producao,
-        p.tipo_espuma,
+        p.tipo_espuma,  -- Mantém o valor original (ID como string)
         p.cor,
         p.altura,
         p.conformidade,
@@ -104,13 +138,20 @@ def load_producoes_com_consumo():
     df = pd.read_sql_query(query, conn)
     conn.close()
 
-    #df["data_producao"] = pd.to_datetime(df["data_producao"], errors="coerce")
-    df["data_producao"] = pd.to_datetime(df["data_producao"],dayfirst=True,errors="coerce")
-
+    df["data_producao"] = pd.to_datetime(df["data_producao"], dayfirst=True, errors="coerce")
     df["quantidade_usada"] = pd.to_numeric(df["quantidade_usada"], errors="coerce")
-    #df["cor"] = pd.to_numeric(df["cor"], errors="coerce")
     df["cor"] = df["cor"].astype(str)
     df["altura"] = pd.to_numeric(df["altura"], errors="coerce")
+    
+    # ✅ MAPEAMENTO MANUAL DOS TIPOS (SOLUÇÃO DEFINITIVA)
+    tipo_map = get_tipo_espuma_map()
+    if tipo_map:
+        # Converte para string e mapeia IDs -> Nomes
+        df["tipo_espuma_original"] = df["tipo_espuma"].copy()  # Backup para debug
+        df["tipo_espuma"] = df["tipo_espuma"].astype(str).map(tipo_map)
+        # Mantém valor original se não encontrar correspondência
+        df["tipo_espuma"] = df["tipo_espuma"].fillna(df["tipo_espuma_original"])
+    
     return df
 
 # ================================================================
@@ -135,6 +176,10 @@ with col_title:
 # CARREGAR DADOS COM CONSUMO
 # ================================================================
 df_completo = load_producoes_com_consumo()
+
+# 🔍 DEBUG TEMPORÁRIO (remova depois se funcionar)
+st.write("Valores únicos em tipo_espuma:", df_completo["tipo_espuma"].unique().tolist())
+st.write("Mapa de tipos carregado:", get_tipo_espuma_map())
 
 if df_completo.empty:
     st.warning("Nenhum registro encontrado.")
@@ -170,12 +215,6 @@ if isinstance(periodo, str):
 elif len(periodo) == 1:
     periodo = (periodo[0], periodo[0])
 
-# Filtrar dados de produção
-#df_filtrado = df_producao[
- #   (df_producao["data_producao"].dt.date >= periodo[0]) &
-  #  (df_producao["data_producao"].dt.date <= periodo[1])
-#].copy()
-
 data_inicio = pd.to_datetime(periodo[0])
 data_fim = pd.to_datetime(periodo[1]) + pd.Timedelta(days=1)
 
@@ -183,19 +222,14 @@ df_filtrado = df_producao[
     df_producao["data_producao"].between(data_inicio, data_fim)
 ].copy()
 
-
 if tipo_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado["tipo_espuma"] == tipo_selecionado]
 
 # Filtrar dados de consumo
 df_consumo = df_completo.dropna(subset=["quantidade_usada", "componente"])
-#df_consumo_filtrado = df_consumo[
-    #(df_consumo["data_producao"].dt.date >= periodo[0]) &
-    #(df_consumo["data_producao"].dt.date <= periodo[1])].copy()
 df_consumo_filtrado = df_consumo[
     df_consumo["data_producao"].between(data_inicio, data_fim)
-    ].copy()
-
+].copy()
 
 if tipo_selecionado != "Todos":
     df_consumo_filtrado = df_consumo_filtrado[df_consumo_filtrado["tipo_espuma"] == tipo_selecionado]
@@ -337,7 +371,7 @@ if not df_consumo_filtrado.empty:
         paper_bgcolor="white",
         plot_bgcolor="white",
         font_color="#2c3e50",
-        xaxis=dict(tickangle=-45)  # Rotaciona os rótulos se ficarem muito apertados
+        xaxis=dict(tickangle=-45)
     )
     st.plotly_chart(fig_tendencia, use_container_width=True)
     
