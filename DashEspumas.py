@@ -72,60 +72,46 @@ h1, h2, h3 {
 """, unsafe_allow_html=True)
 
 # ================================================================
-# BANCO DE DADOS
+# BANCO DE DADOS - CAMINHO ABSOLUTO
 # ================================================================
+# 🔧 CORREÇÃO 1: Use o caminho absoluto correto para o banco de dados
+# Substitua pelo caminho real do seu sistema
 import os
 base_dir = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(base_dir, "instance", "producao.db")
 
+# 🔧 CORREÇÃO 1b: Verificação alternativa se o caminho acima não funcionar
 if not os.path.exists(DB_PATH):
-    st.error(f"❌ Banco de dados não encontrado em: `{DB_PATH}`")
-    st.stop()
-
-# ✅ FUNÇÃO PARA CARREGAR O MAPEAMENTO ID -> NOME DOS TIPOS DE ESPUMA
-@st.cache_data(ttl=3600)
-def get_tipo_espuma_map():
-    """Retorna dicionário mapeando ID (como string) -> Nome dos tipos de espuma."""
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        
-        # 🔍 Detectar nome correto da tabela (flexível)
-        tabelas_query = "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%tipo%espuma%' OR name LIKE '%tipo_espuma%'"
-        tabelas = pd.read_sql_query(tabelas_query, conn)
-        
-        if tabelas.empty:
-            # Tentar nomes comuns
-            nomes_possiveis = ['tipo_espuma', 'tipos_espuma', 'tipoespuma', 'tipos']
-            for nome in nomes_possiveis:
-                try:
-                    df_tipos = pd.read_sql_query(f"SELECT id, nome FROM {nome}", conn)
-                    conn.close()
-                    return {str(row['id']): row['nome'] for _, row in df_tipos.iterrows()}
-                except:
-                    continue
-            conn.close()
-            return {}
-        
-        nome_tabela = tabelas.iloc[0]['name']
-        df_tipos = pd.read_sql_query(f"SELECT id, nome FROM {nome_tabela}", conn)
-        conn.close()
-        
-        return {str(row['id']): row['nome'] for _, row in df_tipos.iterrows()}
+    # Tenta caminho relativo alternativo
+    DB_PATH = os.path.join(os.path.dirname(base_dir), "instance", "producao.db")
     
-    except Exception as e:
-        st.warning(f"⚠️ Erro ao carregar tipos de espuma: {e}")
-        return {}
+    if not os.path.exists(DB_PATH):
+        st.error(f"❌ Banco de dados não encontrado em: `{DB_PATH}`")
+        st.info("""
+        🔧 **Solução:** Verifique o caminho do banco de dados.
+        - Caminho atual: `{DB_PATH}`
+        - O banco deve estar em: `/caminho/do/sistema/instance/producao.db`
+        """)
+        st.stop()
 
-# ✅ FUNÇÃO PRINCIPAL DE CARREGAMENTO DE DADOS (SEM JOIN PROBLEMÁTICO)
+# ================================================================
+# FUNÇÃO PRINCIPAL DE CARREGAMENTO DE DADOS
+# ================================================================
 @st.cache_data(ttl=60)
 def load_producoes_com_consumo():
+    """
+    Carrega dados de produção com consumo de produtos químicos.
+    🔧 CORREÇÃO 2: Remove mapeamento de tipo_espuma (sistema usa texto direto)
+    """
     conn = sqlite3.connect(DB_PATH)
+    
+    # Query simplificada - tipo_espuma já vem como texto do banco
     query = """
     SELECT 
         p.id AS producao_id_interno,
         p.producao_id AS bloco,
         p.data_producao,
-        p.tipo_espuma,  -- Mantém o valor original (ID como string)
+        p.tipo_espuma,  -- Já é texto, não precisa de mapeamento
         p.cor,
         p.altura,
         p.conformidade,
@@ -140,19 +126,12 @@ def load_producoes_com_consumo():
     df = pd.read_sql_query(query, conn)
     conn.close()
 
-    df["data_producao"] = pd.to_datetime(df["data_producao"], dayfirst=True, errors="coerce")
+    # 🔧 CORREÇÃO 3: Conversão de tipos
+    df["data_producao"] = pd.to_datetime(df["data_producao"],errors="coerce")
     df["quantidade_usada"] = pd.to_numeric(df["quantidade_usada"], errors="coerce")
     df["cor"] = df["cor"].astype(str)
     df["altura"] = pd.to_numeric(df["altura"], errors="coerce")
-    
-    # ✅ MAPEAMENTO MANUAL DOS TIPOS (SOLUÇÃO DEFINITIVA)
-    tipo_map = get_tipo_espuma_map()
-    if tipo_map:
-        # Converte para string e mapeia IDs -> Nomes
-        df["tipo_espuma_original"] = df["tipo_espuma"].copy()  # Backup para debug
-        df["tipo_espuma"] = df["tipo_espuma"].astype(str).map(tipo_map)
-        # Mantém valor original se não encontrar correspondência
-        df["tipo_espuma"] = df["tipo_espuma"].fillna(df["tipo_espuma_original"])
+    df["tipo_espuma"] = df["tipo_espuma"].astype(str)  # Já é texto, mantém como está
     
     return df
 
@@ -179,9 +158,8 @@ with col_title:
 # ================================================================
 df_completo = load_producoes_com_consumo()
 
-# 🔍 DEBUG TEMPORÁRIO (remova depois se funcionar)
-st.write("Valores únicos em tipo_espuma:", df_completo["tipo_espuma"].unique().tolist())
-st.write("Mapa de tipos carregado:", get_tipo_espuma_map())
+# 🔧 REMOVIDO: Debug temporário (descomente se precisar debugar)
+# st.write("Valores únicos em tipo_espuma:", df_completo["tipo_espuma"].unique().tolist())
 
 if df_completo.empty:
     st.warning("Nenhum registro encontrado.")
@@ -409,7 +387,7 @@ if not df_consumo_filtrado.empty:
 st.markdown("### 📋 Detalhes das Produções")
 
 df_tabela = df_filtrado.copy()
-df_tabela["data_producao"] = df_tabela["data_producao"].dt.strftime("%d/%m/%Y")
+df_tabela["data_producao"] = df_tabela["data_producao"].dt.strftime("%m/%d/%Y")
 df_tabela = df_tabela.rename(columns={
     "bloco": "Bloco",
     "data_producao": "Data",

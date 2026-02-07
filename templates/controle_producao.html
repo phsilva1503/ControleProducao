@@ -8,7 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Ícones do Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
     <!-- CSS Personalizado -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
@@ -55,44 +54,36 @@
                         <h5 class="section-title">
                             <i class="bi bi-menu-button-wide"></i> Operações
                         </h5>
-
                         <!-- Menu item for technical data sheet registration -->
                         <div class="menu-item" onclick="mostrarTela('fichaTecnica')">
-                            <i class="bi bi-clipboard-data"></i> Cadastro de Ficha Técnica
-                        </div> 
-
+                            <i class="bi bi-clipboard-data"></i>  Cadastro de Ficha Técnica
+                        </div>
                         <div class="menu-item active" onclick="mostrarTela('cadastro')">
                             <i class="bi bi-file-earmark-text"></i> Cadastro de Produção
                         </div>
-
                         <div class="menu-item" onclick="mostrarTela('Produções')">
-                            <i class="bi bi-clipboard-data"></i> Produções cadastradas
+                            <i class="bi bi-box-seam"></i> Produções cadastradas
                         </div>
-
                         <div class="menu-item" onclick="mostrarTela('Componentes')">
-                            <i class="bi bi-archive"></i> Componentes
+                            <i class="bi bi-box-seam"></i> Componentes
                         </div>
-
-                        <div class="menu-item" onclick="mostrarTela('estoque')">
+                        <div class="menu-item " onclick="mostrarTela('estoque')">
                             <i class="bi bi-box-seam"></i> Estoque Atual
                         </div>
-                        
                         <!-- Histórico e Gráficos - Link para Streamlit Cloud -->
-                        <a class="menu-item text-decoration-none d-flex align-items-center" 
-                           href="https://dashboard-plataforma-err6cvzmsqkadji2bh7b75.streamlit.app/" 
+                        <a class="menu-item text-decoration-none d-flex align-items-center"
+                           href="https://dashboard-plataforma-err6cvzmsqkadji2bh7b75.streamlit.app/"
                            rel="noopener noreferrer"
-                           target="_blank" 
+                           target="_blank"
                            style="color: inherit; padding: 8px 12px; border-radius: 4px;"
-                           onmouseover="this.style.backgroundColor='#f8f9fa'"
+                           onmouseover="this.style.backgroundColor='#f8f9'"
                            onmouseout="this.style.backgroundColor='transparent'">
                             <i class="bi bi-graph-up me-2"></i> Histórico e Gráficos
                         </a>
-                        
                         <!-- Fórmulas Químicas - Link para tela interna -->
                         <div class="menu-item" onclick="mostrarTela('formulas')">
                             <i class="bi bi-journal-text"></i> Fórmulas Químicas
                         </div>
-                        
                         <hr class="my-4">
                         <h5 class="section-title">
                             <i class="bi bi-info-circle"></i> Informações Técnicas
@@ -107,24 +98,24 @@
             <!-- Coluna Direita: Conteúdo Dinâmico -->
             <div class="col-md-9">
                 <!-- Tela: Cadastro de Bloco -->
-                <div id="tela-cadastro" class="card">
+                <div id="tela-cadastro" class="card d-none">
                     <div class="card-body">
                         <h4 class="section-title">
                             <i class="bi bi-clipboard-check"></i> Cadastro de Bloco de Espuma
                         </h4>
                         <!-- ✅ BLOCO DE MENSAGENS FLASH -->
                         {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                                {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                                </div>
-                                {% endfor %}
-                            {% endif %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
                         {% endwith %}
 
-                        <!-- FORMULÁRIO DE CADASTRO DE PRODUÇÃO -->
+                        <!-- FORMULÁRIO DE CADASTRO DE PRODUÇÃO  - CORRIGIR FORMS DINAMICOS-->
                         <form id="formulario-bloco" method="POST" action="{{ url_for('cadastro_producao') }}">
                             <div class="row mb-3">
                                 <div class="col-md-6">
@@ -190,48 +181,54 @@
                             <!-- container que será preenchido dinamicamente -->
                             <div id="lista_componentes" class="row g-3">
                                 <script>
-                                    document.addEventListener("DOMContentLoaded", function() {
-                                        const selectTipo = document.getElementById("tipo_espuma");
-                                        const listaComponentes = document.getElementById("lista_componentes");
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    const selectTipo = document.getElementById("tipo_espuma");
+                                    const listaComponentes = document.getElementById("lista_componentes");
 
-                                        async function carregarComponentes(tipoId) {
-                                            if (!tipoId) {
-                                                listaComponentes.innerHTML = "";
-                                                return;
-                                            }
-
-                                            try {
-                                                const res = await fetch(`/componentes_por_tipo/${tipoId}`);
-                                                if (!res.ok) throw new Error("Erro ao buscar componentes");
-                                                const componentes = await res.json();
-
-                                                listaComponentes.innerHTML = "";
-
-                                                componentes.forEach(c => {
-                                                    const html = `
-                                                    <div class="col-md-4 componente-item" data-componente-id="${c.id}">
-                                                        <label for="componente_${c.id}" class="form-label">${c.nome} (kg):</label>
-                                                        <input type="number" class="form-control" id="componente_${c.id}" name="componente_${c.id}" step="0.01" min="0" value="0">
-                                                    </div>`;
-                                                    listaComponentes.insertAdjacentHTML('beforeend', html);
-                                                });
-
-                                            } catch (err) {
-                                                console.error(err);
-                                            }
+                                    async function carregarComponentes(tipoId) {
+                                        if (!tipoId) {
+                                            listaComponentes.innerHTML = ""; // limpa se não selecionar nada
+                                            return;
                                         }
 
-                                        if (selectTipo && selectTipo.value) {
-                                            carregarComponentes(selectTipo.value);
-                                        }
+                                        try {
+                                            const res = await fetch(`/componentes_por_tipo/${tipoId}`);
+                                            if (!res.ok) throw new Error("Erro ao buscar componentes");
+                                            const componentes = await res.json();
 
-                                        if (selectTipo) {
-                                            selectTipo.addEventListener("change", function() {
-                                                carregarComponentes(this.value);
+                                            // limpar
+                                            listaComponentes.innerHTML = "";
+
+                                            // gerar inputs — colocamos value=0 por padrão
+                                            componentes.forEach(c => {
+                                                const html = `
+                                                <div class="col-md-4 componente-item" data-componente-id="${c.id}">
+                                                    <label for="componente_${c.id}" class="form-label">${c.nome} (kg):</label>
+                                                    <input type="number" class="form-control" id="componente_${c.id}" name="componente_${c.id}" step="0.01" min="0" value="0">
+                                                </div>`;
+                                                listaComponentes.insertAdjacentHTML('beforeend', html);
                                             });
+
+                                        } catch (err) {
+                                            console.error(err);
+                                            // opcional: mostrar mensagem visual ao usuário
                                         }
-                                    });
+                                    }
+
+                                    // carregar componentes se já existir um valor selecionado (edição/refresh)
+                                    if (selectTipo && selectTipo.value) {
+                                        carregarComponentes(selectTipo.value);
+                                    }
+
+                                    if (selectTipo) {
+                                        selectTipo.addEventListener("change", function() {
+                                            carregarComponentes(this.value);
+                                        });
+                                    }
+                                });
                                 </script>
+
+                                <!-- JS vai injetar aqui os inputs do componente -->
                             </div>
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
@@ -264,18 +261,18 @@
                                 </thead>
                                 <tbody id="estoque-tbody">
                                     {% for componente in todos_componentes %}
-                                        {% set saldo = saldos.get(componente.id, 0) %}
-                                        {% set status = 'Crítico' if saldo < 10 else 'Baixo estoque' if saldo < 50 else 'Normal' %}
-                                        {% set badge_class = 'bg-danger' if saldo < 10 else 'bg-warning text-dark' if saldo < 50 else 'bg-success' %}
-                                        <tr>
-                                            <td>{{ componente.nome }}</td>
-                                            <td>{{ "%.2f"|format(saldo)|replace('.', ',') }}</td>
-                                            <td><span class="badge {{ badge_class }}">{{ status }}</span></td>
-                                            <td>
-                                                <a href="{{ url_for('ajustar_estoque', componente_id=componente.id) }}" class="btn btn-sm btn-warning me-1">Ajuste</a>
-                                                <a href="{{ url_for('movimentacoes', componente_id=componente.id) }}" class="btn btn-sm btn-movimentacoes">Movimentações</a>
-                                            </td>
-                                        </tr>
+                                    {% set saldo = saldos.get(componente.id, 0) %}
+                                    {% set status = 'Crítico' if saldo < 10 else 'Baixoque' if saldo < 50 else 'Normal' %}
+                                    {% set badge_class = 'bg-danger' if saldo < 10 else 'bg-warning text-dark' if saldo < 50 else 'bg-success' %}
+                                    <tr>
+                                        <td>{{ componente.nome }}</td>
+                                        <td>{{ "%.2f"|format(saldo)|replace('.', ',') }}</td>
+                                        <td><span class="badge {{ badge_class }}">{{ status }}</span></td>
+                                        <td>
+                                            <a href="{{ url_for('ajustar_estoque', componente_id=componente.id) }}" class="btn btn-sm btn-warning me-1">Ajustar</a>
+                                            <a href="{{ url_for('movimentacoes', componente_id=componente.id) }}" class="btn btn-sm btn-movimentacoes">Movimentações</a>
+                                        </td>
+                                    </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -283,7 +280,7 @@
                     </div>
                 </div>
 
-                <!-- Tela: Produções Cadastradas -->
+                <!-- Tela: Produções Cadastradas Pedro passou aqui -->
                 <div id="tela-Produções" class="card d-none">
                     <div class="card-body">
                         <h4 class="section-title mb-4">
@@ -291,144 +288,144 @@
                         </h4>
 
                         {% if producoes and producoes|length > 0 %}
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th scope="col">ID</th>
-                                            <th scope="col">Bloco</th>
-                                            <th scope="col">Data</th>
-                                            <th scope="col">Tipo</th>
-                                            <th scope="col">Cor</th>
-                                            <th scope="col">Altura</th>
-                                            <th scope="col">Conformidade</th>
-                                            <th scope="col">Observações</th>
-                                            <th scope="col" class="text-center">Ações</th>
-                                            <th scope="col">Usuário</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for producao in producoes %}
-                                            <tr>
-                                                <td>{{ producao.id }}</td>
-                                                <td>{{ producao.producao_id }}</td>
-                                                <td>{{ producao.data_producao.strftime('%d/%m/%Y') }}</td>
-                                                <td>{{ producao.tipo_espuma }}</td>
-                                                <td>{{ producao.cor }}</td>
-                                                <td>{{ "%.1f"|format(producao.altura)|replace('.', ',') }}</td>
-                                                <td>
-                                                    {% if producao.conformidade == 'Conforme' %}
-                                                        <span class="badge bg-success px-3 py-2">Conforme</span>
-                                                    {% else %}
-                                                        <span class="badge bg-danger px-3 py-2">Não Conforme</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>{{ producao.observacoes or '-' }}</td>
-                                                <td class="text-center">
-                                                    <a href="{{ url_for('ver_componentes_producao', producao_id=producao.id) }}"
-                                                       class="btn btn-outline-primary btn-sm" title="Ver Componentes" data-bs-toggle="tooltip">
-                                                        <i class="bi bi-archive"></i>
-                                                    </a>
-                                                </td>
-                                                <td>{{ producao.usuario_id }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">Bloco</th>
+                                        <th scope="col">Data</th>
+                                        <th scope="col">Tipo</th>
+                                        <th scope="col">Cor</th>
+                                        <th scope="col">Altura</th>
+                                        <th scope="col">Conformidade</th>
+                                        <th scope="col">Observações</th>
+                                        <th scope="col" class="text-center">Ações</th>
+                                        <th scope="col">Usuário</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for producao in producoes %}
+                                    <tr>
+                                        <td>{{ producao.id }}</td>
+                                        <td>{{ producao.producao_id }}</td>
+                                        <td>{{ producao.data_producao.strftime('%d/%m/%Y') }}</td>
+                                        <td>{{ producao.tipo_espuma }}</td>
+                                        <td>{{ producao.cor }}</td>
+                                        <td>{{ "%.1f"|format(producao.altura)|replace('.', ',') }}</td>
+                                        <td>
+                                            {% if producao.conformidade == 'Conforme' %}
+                                                <span class="badge bg-success px-3 py-2">Conforme</span>
+                                            {% else %}
+                                                <span class="badge bg-danger px-3 py-2">Não Conforme</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ producao.observacoes or '-' }}</td>
+                                        <td class="text-center">
+                                            <a href="{{ url_for('ver_componentes_producao', producao_id=producao.id) }}"
+                                            class="btn btn-outline-primary btn-sm" title="Ver Componentes" data-bs-toggle="tooltip">
+                                                <i class="bi bi-eye"></i>  <!-- Ícone de "olho" para visualização -->
+                                            </a>
+                                        </td>
+                                        <td>{{ producao.usuario_id }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                         {% else %}
-                            <div class="alert alert-secondary text-center mt-3" role="alert">
-                                <i class="bi bi-info-circle"></i> Nenhuma produção cadastrada até o momento.
-                            </div>
+                        <div class="alert alert-secondary text-center mt-3" role="alert">
+                            <i class="bi bi-info-circle"></i> Nenhuma produção cadastrada até o momento.
+                        </div>
                         {% endif %}
                     </div>
                 </div>
 
-                <!-- Tela: Componentes -->
                 <div id="tela-Componentes" class="card d-none">
                     <div class="card-body">
                         <h4 class="section-title mb-4">
-                            <i class="bi bi-tools"></i> Cadastro de Componentes
+                        <i class="bi bi-tools"></i> Cadastro de Componentes
                         </h4>
 
                         <!-- Formulário de Cadastro -->
                         <form method="POST" action="{{ url_for('cadastro_componente') }}">
-                            <div class="row align-items-end">
-                                <div class="col-md-9 mb-3">
-                                    <label for="nome" class="form-label">Nome do Componente:</label>
-                                    <input type="text" class="form-control" id="nome" name="nome" placeholder="Digite o nome do componente" required>
-                                </div>
-                                <div class="col-md-3 mb-3 text-end">
-                                    <button type="submit" class="btn btn-success w-100 mt-3">
-                                        <i class="bi bi-save"></i> Salvar
-                                    </button>
-                                </div>
+                        <div class="row align-items-end">
+                            <div class="col-md-9 mb-3">
+                            <label for="nome" class="form-label">Nome do Componente:</label>
+                            <input type="text" class="form-control" id="nome" name="nome" placeholder="Digite o nome do componente" required>
                             </div>
+                            <div class="col-md-3 mb-3 text-end">
+                            <button type="submit" class="btn btn-success w-100 mt-3">
+                                <i class="bi bi-save"></i> Salvar
+                            </button>
+                            </div>
+                        </div>
                         </form>
 
                         <!-- Mensagens Flash -->
                         {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                                {% for category, message in messages %}
-                                    <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
-                                        {{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                                    </div>
-                                {% endfor %}
-                            {% endif %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
                         {% endwith %}
 
                         <!-- Lista de Componentes -->
                         <div class="mt-4">
-                            <h5 class="section-title">
-                                <i class="bi bi-box-seam"></i> Componentes Cadastrados
-                            </h5>
+                        <h5 class="section-title">
+                            <i class="bi bi-box-seam"></i> Componentes Cadastrados
+                        </h5>
 
-                            <div class="table-responsive mt-3">
-                                <table class="table table-hover align-middle text-center">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Nome</th>
-                                            <th>Saldo Atual (kg)</th>
-                                            <th>Status</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for componente in todos_componentes %}
-                                            <tr>
-                                                <td>{{ componente.id }}</td>
-                                                <td class="text-start">{{ componente.nome }}</td>
-                                                <td>{{ "%.2f"|format(saldos.get(componente.id, 0))|replace('.', ',') }}</td>
-                                                <td>
-                                                    {% if componente.ativo %}
-                                                        <a href="{{ url_for('toggle_componente', componente_id=componente.id) }}" 
-                                                           class="badge rounded-pill bg-success text-decoration-none px-3 py-2">
-                                                            Ativo
-                                                        </a>
-                                                    {% else %}
-                                                        <a href="{{ url_for('toggle_componente', componente_id=componente.id) }}" 
-                                                           class="badge rounded-pill bg-secondary text-decoration-none px-3 py-2">
-                                                            Inativo
-                                                        </a>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <a href="{{ url_for('movimentacoes', componente_id=componente.id) }}" 
-                                                       class="btn btn-sm btn-primary mb-1">
-                                                        <i class="bi bi-arrow-repeat"></i> Movimentações
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        {% else %}
-                                            <tr>
-                                                <td colspan="5" class="text-center text-muted">Nenhum componente cadastrado.</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-hover align-middle text-center">
+                            <thead class="table-light">
+                                <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Saldo Atual (kg)</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for componente in todos_componentes %}
+                                <tr>
+                                <td>{{ componente.id }}</td>
+                                <td class="text-start">{{ componente.nome }}</td>
+                                <td>{{ "%.2f"|format(saldos.get(componente.id, 0))|replace('.', ',') }}</td>
+                                <td>
+                                    {% if componente.ativo %}
+                                    <a href="{{ url_for('toggle_componente', componente_id=componente.id) }}" 
+                                        class="badge rounded-pill bg-success text-decoration-none px-3 py-2">
+                                        Ativo
+                                    </a>
+                                    {% else %}
+                                    <a href="{{ url_for('toggle_componente', componente_id=componente.id) }}" 
+                                        class="badge rounded-pill bg-secondary text-decoration-none px-3 py-2">
+                                        Inativo
+                                    </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('movimentacoes', componente_id=componente.id) }}" 
+                                    class="btn btn-sm btn-primary mb-1">
+                                    <i class="bi bi-arrow-repeat"></i> Movimentações
+                                    </a>
+                                    
+                                </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                <td colspan="5" class="text-center text-muted">Nenhum componente cadastrado.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            </table>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -440,31 +437,30 @@
 
                         <!-- Formulário de cadastro -->
                         <div class="card shadow-sm">
-                            <div class="card-header text-white d-flex align-items-center" style="background-color: #003580;">
-                                <!-- Container para centralizar o título -->
-                                <div class="flex-grow-1 text-center">
-                                    <h4 class="mb-0"><i class="bi bi-clipboard-data"></i> Cadastro de Ficha Técnica</h4>
-                                </div>
-                                <!-- Botão à direita -->
-                                <a href="{{ url_for('index') }}" class="btn btn-light btn-sm ms-2">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0"><i class="bi bi-clipboard-data"></i> Cadastro de Ficha Técnica</h4>
+                                <a href="{{ url_for('index') }}" class="btn btn-light btn-sm">
                                     <i class="bi bi-arrow-left-circle"></i> Voltar
                                 </a>
                             </div>
-                            <div class="d-flex justify-content-end mb-3" style="margin-top: 15px; margin-right: 15px;">
-                                <a href="{{ url_for('cadastrar_tipo_espuma') }}" class="btn btn-outline-success">
-                                    <i class="bi bi-plus-circle"></i> Cadastrar Tipo de Espuma
-                                </a>
-                            </div>
+                        <div class="d-flex justify-content-end mb-3" style="margin-top: 15px; margin-right: 15px;">   
+
+                            <a href="{{ url_for('cadastrar_tipo_espuma') }}" class="btn btn-outline-success">
+                                <i class="bi bi-plus-circle"></i> Cadastrar Tipo de Espuma
+                            </a>
+                        </div>
 
                             <div class="card-body">
                                 <form method="POST" action="{{ url_for('cadastrar_ficha_tecnica') }}">
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <label for="tipo_espuma" class="form-label fw-bold">Tipo de Espuma</label>
-                                            <select class="form-select" id="tipo_espuma" name="tipo_espuma" required>
+                                            <select class="form-select" id="tipo_espuma" name="tipo_espuma_id" required>
                                                 <option value="">Selecione...</option>
                                                 {% for tipo in tipos_espuma %}
-                                                    <option value="{{ tipo.id }}">{{ tipo.nome }}</option>
+                                                    <option value="{{ tipo.id }}" {% if request.form.get('tipo_espuma_id') == tipo.id|string %}selected{% endif %}>
+                                                        {{ tipo.nome }}
+                                                    </option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -475,16 +471,17 @@
                                     <h5 class="fw-bold mb-3"><i class="bi bi-flask"></i> Componentes</h5>
                                     <div class="row">
                                         {% for componente in componentes %}
-                                            <div class="col-md-4 mb-2">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox"
-                                                           id="componente_{{ componente.id }}"
-                                                           name="componente_{{ componente.id }}">
-                                                    <label class="form-check-label" for="componente_{{ componente.id }}">
-                                                        {{ componente.nome }}
-                                                    </label>
-                                                </div>
+                                        <div class="col-md-4 mb-2">
+                                            <div class="form-check">
+                                                <input  class="form-check-input" type="checkbox"
+                                                        id="componente_{{ componente.id }}"
+                                                        name="componentes_ids"
+                                                        value="{{ componente.id }}">
+                                                <label class="form-check-label" for="componente_{{ componente.id }}">
+                                                    {{ componente.nome }}
+                                                </label>
                                             </div>
+                                        </div>
                                         {% endfor %}
                                     </div>
 
@@ -533,26 +530,26 @@
                                         </thead>
                                         <tbody>
                                             {% for ficha in fichas %}
-                                                <tr>
-                                                    <td>{{ ficha.id }}</td>
-                                                    <td>{{ ficha.tipo_espuma.nome }}</td>
-                                                    <td>{{ ficha.descricao or '-' }}</td>
-                                                    <td>
-                                                        {% if ficha.componentes %}
-                                                            {% for rel in ficha.componentes %}
-                                                                {{ rel.componente.nome }}{% if not loop.last %}, {% endif %}
-                                                            {% endfor %}
-                                                        {% else %}
-                                                            <span class="text-muted">Sem componentes</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <a href="{{ url_for('editar_ficha_tecnica', ficha_id=ficha.id) }}" 
-                                                           class="btn btn-sm btn-warning">
-                                                            <i class="bi bi-pencil-square"></i> Editar
-                                                        </a>
-                                                    </td>
-                                                </tr>
+                                            <tr>
+                                                <td>{{ ficha.id }}</td>
+                                                <td>{{ ficha.tipo_espuma.nome }}</td>
+                                                <td>{{ ficha.descricao or '-' }}</td>
+                                                <td>
+                                                    {% if ficha.componentes %}
+                                                        {% for rel in ficha.componentes %}
+                                                            {{ rel.componente.nome }}{% if not loop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <span class="text-muted">Sem componentes</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="{{ url_for('editar_ficha_tecnica', ficha_id=ficha.id) }}" 
+                                                    class="btn btn-sm btn-warning">
+                                                        <i class="bi bi-pencil-square"></i> Editar
+                                                    </a>
+                                                </td>
+                                            </tr>
                                             {% endfor %}
                                         </tbody>
                                     </table>
@@ -568,7 +565,7 @@
                 <div id="tela-historico" class="card d-none">
                     <div class="card-body">
                         <h4 class="section-title"><i class="bi bi-graph-up"></i> Histórico e Gráficos</h4>
-                        <p class="text-muted">Funcionalidade em desenvolvimento.</p>
+                        <p class="text-muted">Esta funcionalidade está disponível em nosso dashboard externo. Clique no menu lateral para acessar.</p>
                     </div>
                 </div>
 
@@ -578,7 +575,7 @@
                         <h4 class="section-title mb-4">
                             <i class="bi bi-journal-text"></i> Fórmulas Químicas - BonSono
                         </h4>
-
+                        
                         <!-- Card principal com acesso ao Drive -->
                         <div class="card shadow-sm border-0 mb-4" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
                             <div class="card-body p-4 text-center">
@@ -591,20 +588,18 @@
                                 <p class="card-text text-muted mb-4">
                                     Acesso centralizado a todas as fórmulas químicas, proporções e documentação técnica da BonSono
                                 </p>
-                                
                                 <a href="https://drive.google.com/drive/u/1/folders/1Dzdbxy5PuWwfIsf0-UeBedWnzwhjPxnd"
                                    target="_blank"
                                    rel="noopener noreferrer"
                                    class="btn btn-danger btn-lg px-5 py-3 fw-bold shadow">
                                     <i class="bi bi-folder2-open me-2"></i> Acessar Google Drive
                                 </a>
-                                
                                 <div class="mt-3 text-muted small">
                                     <i class="bi bi-lock-fill"></i> Acesso restrito a colaboradores autorizados
                                 </div>
                             </div>
                         </div>
-
+                        
                         <!-- Documentos disponíveis -->
                         <div class="card mb-4">
                             <div class="card-header bg-primary text-white">
@@ -639,18 +634,18 @@
                                 </div>
                             </div>
                         </div>
-
+                        
                         <!-- Dica de segurança -->
                         <div class="alert alert-warning border-warning mb-4">
                             <div class="d-flex align-items-start">
                                 <i class="bi bi-exclamation-triangle-fill text-warning me-2 mt-1"></i>
                                 <div>
-                                    <strong>Atenção:</strong> Sempre utilize as versões mais recentes das fórmulas. 
+                                    <strong>Atenção:</strong> Sempre utilize as versões mais recentes das fórmulas.
                                     Consulte o responsável técnico antes de qualquer alteração nos parâmetros de produção.
                                 </div>
                             </div>
                         </div>
-
+                        
                         <!-- Instruções de acesso -->
                         <div class="card">
                             <div class="card-header bg-light">
@@ -667,13 +662,13 @@
                         </div>
                     </div>
                 </div>
-            </div> <!-- Fecha .col-md-9 -->
+            </div>
         </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+    <script>    
         // Navegação entre telas
         function mostrarTela(tela) {
             document.querySelectorAll('.col-md-9 > .card').forEach(el => el.classList.add('d-none'));
@@ -681,18 +676,22 @@
             if (alvo) alvo.classList.remove('d-none');
 
             document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-            if (event?.currentTarget) {
-                event.currentTarget.classList.add('active');
-            }
+            event?.currentTarget?.classList.add('active');
         }
 
         // Busca no estoque
-        document.getElementById('search-estoque')?.addEventListener('input', function () {
+        document.getElementById('search-estoque')?.addEventListener('input', function() {
             const term = this.value.toLowerCase();
             const rows = document.querySelectorAll('#estoque-tbody tr');
+            let count = 0;
             rows.forEach(row => {
                 const nome = row.cells[0].textContent.toLowerCase();
-                row.style.display = nome.includes(term) ? '' : 'none';
+                if (nome.includes(term)) {
+                    row.style.display = '';
+                    count++;
+                } else {
+                    row.style.display = 'none';
+                }
             });
         });
 

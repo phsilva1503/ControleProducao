@@ -458,8 +458,8 @@ def routes(app):
                 descricao = request.form.get('descricao', '')
 
                 try:
-                    tipo_espuma_id_int = int(tipo_espuma_id)
-                except ValueError:
+                    tipo_espusma_id_int = int(tipo_espuma_id)
+                except (ValueError, TypeError):  # Agora captura AMBOS ValueError E TypeError
                     flash("Valor inválido para tipo de espuma!", "danger")
                     return redirect(url_for('editar_ficha_tecnica', ficha_id=ficha.id))
 
