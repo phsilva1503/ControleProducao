@@ -72,27 +72,17 @@ h1, h2, h3 {
 """, unsafe_allow_html=True)
 
 # ================================================================
-# BANCO DE DADOS - CAMINHO ABSOLUTO
+# BANCO DE DADOS - CAMINHO CORRETO PARA STREAMLIT CLOUD
 # ================================================================
-# 🔧 CORREÇÃO 1: Use o caminho absoluto correto para o banco de dados
-# Substitua pelo caminho real do seu sistema
-import os
-base_dir = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(base_dir, "instance", "producao.db")
+# O banco está NA MESMA PASTA do script (DASHBOARD_PLATAFORMA)
+DB_PATH = "producao.db"  # ✅ CAMINHO RELATIVO CORRETO
 
-# 🔧 CORREÇÃO 1b: Verificação alternativa se o caminho acima não funcionar
+# Validação visual para debug
+st.sidebar.info(f"🔍 Banco carregado de: `{DB_PATH}`")
 if not os.path.exists(DB_PATH):
-    # Tenta caminho relativo alternativo
-    DB_PATH = os.path.join(os.path.dirname(base_dir), "instance", "producao.db")
-    
-    if not os.path.exists(DB_PATH):
-        st.error(f"❌ Banco de dados não encontrado em: `{DB_PATH}`")
-        st.info("""
-        🔧 **Solução:** Verifique o caminho do banco de dados.
-        - Caminho atual: `{DB_PATH}`
-        - O banco deve estar em: `/caminho/do/sistema/instance/producao.db`
-        """)
-        st.stop()
+    st.error("❌ Banco de dados não encontrado!")
+    st.code(f"Verifique se o arquivo existe em:\n{os.path.abspath(DB_PATH)}", language="bash")
+    st.stop()
 
 # ================================================================
 # FUNÇÃO PRINCIPAL DE CARREGAMENTO DE DADOS
