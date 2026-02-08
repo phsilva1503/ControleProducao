@@ -262,7 +262,7 @@
                                 <tbody id="estoque-tbody">
                                     {% for componente in todos_componentes %}
                                     {% set saldo = saldos.get(componente.id, 0) %}
-                                    {% set status = 'Crítico' if saldo < 10 else 'Baixoque' if saldo < 50 else 'Normal' %}
+                                    {% set status = 'Crítico' if saldo < 10 else 'Baixo estoque' if saldo < 50 else 'Normal' %}
                                     {% set badge_class = 'bg-danger' if saldo < 10 else 'bg-warning text-dark' if saldo < 50 else 'bg-success' %}
                                     <tr>
                                         <td>{{ componente.nome }}</td>

@@ -72,12 +72,11 @@ h1, h2, h3 {
 """, unsafe_allow_html=True)
 
 # ================================================================
-# BANCO DE DADOS - CAMINHO CORRETO PARA STREAMLIT CLOUD
+# BANCO DE DADOS - CAMINHO RELATIVO (FUNCIONA NO STREAMLIT CLOUD)
 # ================================================================
-# O banco está NA MESMA PASTA do script (DASHBOARD_PLATAFORMA)
-DB_PATH = "producao.db"  # ✅ CAMINHO RELATIVO CORRETO
+DB_PATH = "instance/producao.db"  # ✅ Caminho correto para o Streamlit Cloud
 
-# Validação visual para debug
+# Validação visual
 st.sidebar.info(f"🔍 Banco carregado de: `{DB_PATH}`")
 if not os.path.exists(DB_PATH):
     st.error("❌ Banco de dados não encontrado!")
