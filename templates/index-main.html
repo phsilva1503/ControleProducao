@@ -21,7 +21,7 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
                 <img src="{{ url_for('static', filename='imagens/logo-bonsono.png') }}" alt="Logo BonSono" width="40" height="40">
-                Plataforma de Gestão da Qualidade teste
+                Plataforma de Gestão da Qualidade
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -33,34 +33,32 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('controle_producao') }}">Controle de Produção</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('lean_six_sigma') }}">Lean Six Sigma</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('analise_preditiva') }}">Análise Preditiva</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Sair</a></li>
                 </ul>
             </div>
         </div>
     </nav>
-<!-- Hero Section -->
-<section class="hero-section py-5">
-    <div class="container text-center">  
-        <h1 class="display-4 fw-bold">Plataforma de Gestão da Qualidade</h1>
-        <p class="lead">Solução integrada para qualidade, produção e melhoria contínua usando Lean Six Sigma e análise de dados</p>
-        <a href="#modulos" class="btn btn-hero-outline">Explorar Módulos</a> 
-        <a href="#Login/Registro" class="btn btn-hero-outline">Acessar Plataforma</a>
-    </div>
-    <!-- Flash Messages -->
-    <div class="container mt-3">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-               {% for category, message in messages %}
-                <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
-</section>
+
+    <!-- Hero Section -->
+    <section class="hero-section py-5">
+        <div class="container text-center">  
+            <h1 class="display-4 fw-bold">Plataforma de Gestão da Qualidade</h1>
+            <p class="lead">Solução integrada para qualidade, produção e melhoria contínua usando Lean Six Sigma e análise de dados</p>
+        </div>
+        <!-- Flash Messages -->
+        <div class="container mt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                   {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </section>
 
     <!-- Módulos da Plataforma -->
     <section id="modulos" class="py-5">
@@ -69,9 +67,10 @@
                 <h2 class="fw-bold">Módulos da Plataforma</h2>
                 <p class="text-muted">Ferramentas integradas para otimização dos processos de produção</p>
             </div>
-            <div class="row g-4">
+            <!-- 👇 Linha centralizada com 2 cards por linha -->
+            <div class="row g-4 justify-content-center">
                 <!-- Laudo Técnico -->
-                <div class="col-md-4 col-sm-6">
+                <div class="col-md-6 col-sm-6">
                     <div class="card p-4 h-100 text-center">
                         <div class="bi bi-file-earmark-text mb-3 fs-1"></div>
                         <h5 class="card-title">Laudo Técnico</h5>
@@ -81,7 +80,7 @@
                 </div>
 
                 <!-- Controle de Produção -->
-                <div class="col-md-4 col-sm-6">
+                <div class="col-md-6 col-sm-6">
                     <div class="card p-4 h-100 text-center">
                         <div class="bi bi-graph-up-arrow mb-3 fs-1"></div>
                         <h5 class="card-title">Controle de Produção</h5>
@@ -91,7 +90,7 @@
                 </div>
 
                 <!-- Lean Six Sigma -->
-                <div class="col-md-4 col-sm-6">
+                <div class="col-md-6 col-sm-6">
                     <div class="card p-4 h-100 text-center">
                         <div class="bi bi-diagram-3 mb-3 fs-1"></div>
                         <h5 class="card-title">Lean Six Sigma</h5>
@@ -101,97 +100,135 @@
                 </div>
 
                 <!-- Análise Preditiva -->
-                <div class="col-md-4 col-sm-6">
+                <div class="col-md-6 col-sm-6">
                     <div class="card p-4 h-100 text-center">
                         <div class="bi bi-cpu mb-3 fs-1"></div>
                         <h5 class="card-title">Análise Preditiva</h5>
-                        <p class="card-text">Previsão de falhas ou desvios usando inteligência artificial</p>
+                        <p class="card-text">Previsão de falhas ou desvios usando análise de dados</p>
                         <a href="{{ url_for('analise_preditiva') }}" class="btn btn-primary">Acessar</a>
-                    </div>
-                </div>
-
-                <!-- Dashboard -->
-                <div class="col-md-4 col-sm-6">
-                    <div class="card p-4 h-100 text-center">
-                        <div class="bi bi-speedometer2 mb-3 fs-1"></div>
-                        <h5 class="card-title">Dashboard</h5>
-                        <p class="card-text">Indicadores em tempo real sobre produção, qualidade e desempenho</p>
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Acessar</a>
-                    </div>
-                </div>
-
-                <!-- Relatórios -->
-                <div class="col-md-4 col-sm-6">
-                    <div class="card p-4 h-100 text-center">
-                        <div class="bi bi-file-bar-graph mb-3 fs-1"></div>
-                        <h5 class="card-title">Relatórios</h5>
-                        <p class="card-text">Geração automatizada de relatórios técnicos e análises</p>
-                        <a href="{{ url_for('relatorios') }}" class="btn btn-primary">Acessar</a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Outras seções (Dashboard e Análise Preditiva) permanecem iguais -->
-
-
     <!-- Footer -->
-<footer class="text-light py-5" style="background: linear-gradient(135deg, #003580, #002255);">
-  <div class="container">
-    <div class="row gy-4">
-      <!-- Coluna 1: Descrição -->
-      <div class="col-md-4">
-        <h5 class="text-primary-light mb-3">Plataforma de Gestão de Espumas Industriais</h5>
-        <p class="text-light-light" style="line-height: 1.6;">
-          Soluções integradas para monitoramento, análise e melhoria contínua de processos de produção de espumas.
-        </p>
-      </div>
-
-      <!-- Coluna 2: Links Rápidos -->
-      <div class="col-md-4">
-        <h5 class="text-primary-light mb-3">Links Rápidos</h5>
-        <ul class="list-unstyled mb-0">
-          <li class="mb-2">
-            <a href="{{ url_for('laudo_tecnico') }}" class="footer-link">Laudo Técnico</a>
-          </li>
-          <li class="mb-2">
-            <a href="{{ url_for('controle_producao') }}" class="footer-link">Controle de Produção</a>
-          </li>
-          <li class="mb-2">
-            <a href="{{ url_for('lean_six_sigma') }}" class="footer-link">Lean Six Sigma</a>
-          </li>
-          <li class="mb-2">
-            <a href="{{ url_for('analise_preditiva') }}" class="footer-link">Análise Preditiva</a>
-          </li>
-          <li class="mb-2">
-            <a href="{{ url_for('dashboard') }}" class="footer-link">Dashboard</a>
-          </li>
-          <li class="mb-2">
-            <a href="{{ url_for('dashboard') }}" class="footer-link">Sair</a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Coluna 3: Contato -->
-      <div class="col-md-4">
-        <h5 class="text-primary-light mb-3">Contato</h5>
-        <p class="mb-2"><i class="bi bi-envelope me-2 text-info"></i> suporte@espumasindustriais.com</p>
-        <p class="mb-2"><i class="bi bi-geo-alt me-2 text-info"></i> Universidade Federal de Alagoas</p>
-        <p class="mb-0"><i class="bi bi-info-circle me-2 text-warning"></i> Desenvolvido como parte do TCC</p>
-      </div>
+    <footer class="footer" style="background: linear-gradient(to right, #002d7a 0%, #003580 100%); color: #ffffff; padding: 40px 0 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <div class="container">
+        <div class="row mb-4">
+            <!-- Coluna 1: Sobre a Plataforma -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <h5 class="mb-3" style="font-weight: 600; font-size: 1.3rem; color: #4dabf7; display: flex; align-items: center;">
+                    <i class="bi bi-building me-2" style="font-size: 1.4rem;"></i>
+                    Plataforma de Gestão de Espumas Industriais
+                </h5>
+                <p class="fs-6" style="line-height: 1.7; color: #e0e7ff; max-width: 90%;">
+                    Soluções integradas para monitoramento, análise e melhoria contínua de processos de produção de espumas. 
+                    <strong style="color: #60a5fa;">Foco em qualidade, eficiência e inovação</strong> na indústria de colchões.
+                </p>
+            </div>
+            
+            <!-- Coluna 2: Links Rápidos -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <h5 class="mb-3" style="font-weight: 600; font-size: 1.3rem; color: #4dabf7; display: flex; align-items: center;">
+                    <i class="bi bi-link-45deg me-2" style="font-size: 1.4rem;"></i>
+                    Links Rápidos
+                </h5>
+                <ul class="list-unstyled">
+                    <li class="mb-3">
+                        <a href="{{ url_for('laudo_tecnico') }}" class="text-decoration-none d-flex align-items-center" style="color: #e0e7ff; font-size: 1.05rem; transition: all 0.3s; padding: 8px 0;">
+                            <i class="bi bi-file-earmark-text me-3" style="color: #60a5fa; font-size: 1.2rem;"></i> 
+                            Laudo Técnico
+                        </a>
+                    </li>
+                    <li class="mb-3">
+                        <a href="{{ url_for('controle_producao') }}" class="text-decoration-none d-flex align-items-center" style="color: #e0e7ff; font-size: 1.05rem; transition: all 0.3s; padding: 8px 0;">
+                            <i class="bi bi-bar-chart me-3" style="color: #60a5fa; font-size: 1.2rem;"></i> 
+                            Controle de Produção
+                        </a>
+                    </li>
+                    <li class="mb-3">
+                        <a href="{{ url_for('lean_six_sigma') }}" class="text-decoration-none d-flex align-items-center" style="color: #e0e7ff; font-size: 1.05rem; transition: all 0.3s; padding: 8px 0;">
+                            <i class="bi bi-gear me-3" style="color: #60a5fa; font-size: 1.2rem;"></i> 
+                            Lean Six Sigma
+                        </a>
+                    </li>
+                    <li class="mb-3">
+                        <a href="{{ url_for('analise_preditiva') }}" class="text-decoration-none d-flex align-items-center" style="color: #e0e7ff; font-size: 1.05rem; transition: all 0.3s; padding: 8px 0;">
+                            <i class="bi bi-graph-up me-3" style="color: #60a5fa; font-size: 1.2rem;"></i> 
+                            Análise Preditiva
+                        </a>
+                    </li>
+                    <li class="mt-4">
+                        <a href="{{ url_for('logout') }}" class="text-decoration-none d-flex align-items-center" style="color: #f87171; font-size: 1.05rem; font-weight: 600; transition: all 0.3s; padding: 8px 0;">
+                            <i class="bi bi-box-arrow-right me-3" style="color: #f87171; font-size: 1.2rem;"></i> 
+                            Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Coluna 3: Contato -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <h5 class="mb-3" style="font-weight: 600; font-size: 1.3rem; color: #4dabf7; display: flex; align-items: center;">
+                    <i class="bi bi-person-vcard me-2" style="font-size: 1.4rem;"></i>
+                    Contato
+                </h5>
+                <div class="mb-4" style="background: rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 15px;">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-envelope me-3" style="font-size: 1.4rem; color: #60a5fa;"></i>
+                        <div>
+                            <h6 class="text-white mb-1" style="font-weight: 600; font-size: 1.05rem;">Email</h6>
+                            <a href="mailto:qualidade@bonsono.com.br" class="text-decoration-none" style="color: #d4e6ff; font-size: 1.05rem;">
+                                qualidade@bonsono.com.br
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-geo-alt me-3" style="font-size: 1.4rem; color: #60a5fa;"></i>
+                        <div>
+                            <h6 class="text-white mb-1" style="font-weight: 600; font-size: 1.05rem;">Localização</h6>
+                            <p class="mb-0" style="color: #d4e6ff; font-size: 1.05rem;">Colchões BonSono - Universidade Federal de Alagoas</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-award me-3" style="font-size: 1.4rem; color: #60a5fa;"></i>
+                        <div>
+                            <h6 class="text-white mb-1" style="font-weight: 600; font-size: 1.05rem;">Projeto Acadêmico</h6>
+                            <p class="mb-0" style="color: #d4e6ff; font-size: 1.05rem;">Desenvolvido como parte do TCC</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Linha divisória -->
+        <div class="border-top border-secondary opacity-25 my-4"></div>
+        
+        <!-- Rodapé inferior -->
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                <p class="mb-0" style="color: #c0d1e6; font-size: 0.95rem; font-weight: 500;">
+                    © 2026 Plataforma de Gestão da Qualidade. Todos os direitos reservados.
+                </p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <div class="d-inline-flex gap-4">
+                    <a href="#" class="text-decoration-none" style="color: #c0d1e6; transition: all 0.3s; font-size: 1.3rem;">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="#" class="text-decoration-none" style="color: #c0d1e6; transition: all 0.3s; font-size: 1.3rem;">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
+                    <a href="#" class="text-decoration-none" style="color: #c0d1e6; transition: all 0.3s; font-size: 1.3rem;">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Divisória -->
-    <hr class="hr-footer my-4" style="border-color: rgba(255, 255, 255, 0.1);">
-
-    <!-- Crédito Final -->
-    <div class="text-center">
-      <p class="mb-0 text-muted-light" style="font-size: 0.9rem;">
-        &copy; 2025 Plataforma de Gestão de Espumas Industriais. Todos os direitos reservados.
-      </p>
-    </div>
-  </div>
 </footer>
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
