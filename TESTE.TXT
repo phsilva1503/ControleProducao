@@ -12,3 +12,4 @@ ajuste de merge teste
 ajuste branch 2
 
 ajuste de branch 3
+ajuste branch 4
