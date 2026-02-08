@@ -1,6 +1,6 @@
 # ================================================================
 # Dashboard Profissional – Estilo Corporativo Azul – BonSono
-# COM CONSUMO DE PRODUTOS QUÍMICOS
+# COM CONSUMO DE PRODUTOS QUÍMICOS + CORREÇÃO DE TIPOS DE ESPUMA
 # ================================================================
 
 import streamlit as st
@@ -17,7 +17,6 @@ st.set_page_config(
     page_icon="📊",
     layout="wide"
 )
-
 
 # ================================================================
 # ESTILO GLOBAL – PALETA AZUL PREMIUM
@@ -73,23 +72,35 @@ h1, h2, h3 {
 """, unsafe_allow_html=True)
 
 # ================================================================
-# BANCO DE DADOS
+# BANCO DE DADOS - CAMINHO RELATIVO (FUNCIONA NO STREAMLIT CLOUD)
 # ================================================================
-DB_PATH = "instance/producao.db"
+DB_PATH = "instance/producao.db"  # ✅ Caminho correto para o Streamlit Cloud
 
+# Validação visual
+st.sidebar.info(f"🔍 Banco carregado de: `{DB_PATH}`")
 if not os.path.exists(DB_PATH):
-    st.error(f"❌ Banco de dados não encontrado em: `{DB_PATH}`")
+    st.error("❌ Banco de dados não encontrado!")
+    st.code(f"Verifique se o arquivo existe em:\n{os.path.abspath(DB_PATH)}", language="bash")
     st.stop()
 
+# ================================================================
+# FUNÇÃO PRINCIPAL DE CARREGAMENTO DE DADOS
+# ================================================================
 @st.cache_data(ttl=60)
 def load_producoes_com_consumo():
+    """
+    Carrega dados de produção com consumo de produtos químicos.
+    🔧 CORREÇÃO 2: Remove mapeamento de tipo_espuma (sistema usa texto direto)
+    """
     conn = sqlite3.connect(DB_PATH)
+    
+    # Query simplificada - tipo_espuma já vem como texto do banco
     query = """
     SELECT 
         p.id AS producao_id_interno,
         p.producao_id AS bloco,
         p.data_producao,
-        p.tipo_espuma,
+        p.tipo_espuma,  -- Já é texto, não precisa de mapeamento
         p.cor,
         p.altura,
         p.conformidade,
@@ -104,13 +115,13 @@ def load_producoes_com_consumo():
     df = pd.read_sql_query(query, conn)
     conn.close()
 
-    #df["data_producao"] = pd.to_datetime(df["data_producao"], errors="coerce")
-    df["data_producao"] = pd.to_datetime(df["data_producao"],dayfirst=True,errors="coerce")
-
+    # 🔧 CORREÇÃO 3: Conversão de tipos
+    df["data_producao"] = pd.to_datetime(df["data_producao"],errors="coerce")
     df["quantidade_usada"] = pd.to_numeric(df["quantidade_usada"], errors="coerce")
-    #df["cor"] = pd.to_numeric(df["cor"], errors="coerce")
     df["cor"] = df["cor"].astype(str)
     df["altura"] = pd.to_numeric(df["altura"], errors="coerce")
+    df["tipo_espuma"] = df["tipo_espuma"].astype(str)  # Já é texto, mantém como está
+    
     return df
 
 # ================================================================
@@ -135,6 +146,9 @@ with col_title:
 # CARREGAR DADOS COM CONSUMO
 # ================================================================
 df_completo = load_producoes_com_consumo()
+
+# 🔧 REMOVIDO: Debug temporário (descomente se precisar debugar)
+# st.write("Valores únicos em tipo_espuma:", df_completo["tipo_espuma"].unique().tolist())
 
 if df_completo.empty:
     st.warning("Nenhum registro encontrado.")
@@ -170,12 +184,6 @@ if isinstance(periodo, str):
 elif len(periodo) == 1:
     periodo = (periodo[0], periodo[0])
 
-# Filtrar dados de produção
-#df_filtrado = df_producao[
- #   (df_producao["data_producao"].dt.date >= periodo[0]) &
-  #  (df_producao["data_producao"].dt.date <= periodo[1])
-#].copy()
-
 data_inicio = pd.to_datetime(periodo[0])
 data_fim = pd.to_datetime(periodo[1]) + pd.Timedelta(days=1)
 
@@ -183,19 +191,14 @@ df_filtrado = df_producao[
     df_producao["data_producao"].between(data_inicio, data_fim)
 ].copy()
 
-
 if tipo_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado["tipo_espuma"] == tipo_selecionado]
 
 # Filtrar dados de consumo
 df_consumo = df_completo.dropna(subset=["quantidade_usada", "componente"])
-#df_consumo_filtrado = df_consumo[
-    #(df_consumo["data_producao"].dt.date >= periodo[0]) &
-    #(df_consumo["data_producao"].dt.date <= periodo[1])].copy()
 df_consumo_filtrado = df_consumo[
     df_consumo["data_producao"].between(data_inicio, data_fim)
-    ].copy()
-
+].copy()
 
 if tipo_selecionado != "Todos":
     df_consumo_filtrado = df_consumo_filtrado[df_consumo_filtrado["tipo_espuma"] == tipo_selecionado]
@@ -337,7 +340,7 @@ if not df_consumo_filtrado.empty:
         paper_bgcolor="white",
         plot_bgcolor="white",
         font_color="#2c3e50",
-        xaxis=dict(tickangle=-45)  # Rotaciona os rótulos se ficarem muito apertados
+        xaxis=dict(tickangle=-45)
     )
     st.plotly_chart(fig_tendencia, use_container_width=True)
     
@@ -373,7 +376,7 @@ if not df_consumo_filtrado.empty:
 st.markdown("### 📋 Detalhes das Produções")
 
 df_tabela = df_filtrado.copy()
-df_tabela["data_producao"] = df_tabela["data_producao"].dt.strftime("%d/%m/%Y")
+df_tabela["data_producao"] = df_tabela["data_producao"].dt.strftime("%m/%d/%Y")
 df_tabela = df_tabela.rename(columns={
     "bloco": "Bloco",
     "data_producao": "Data",

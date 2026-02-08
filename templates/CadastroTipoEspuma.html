@@ -3,77 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <title>Cadastro de Tipo de Espuma</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f3f7fb;
+        }
+
+        .page-title {
+            font-weight: 600;
+            color: #0d47a1;
+        }
+
+        .card-custom {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .btn-primary {
+            background-color: #0d47a1;
+            border-color: #0d47a1;
+            border-radius: 10px;
+            padding: 8px 16px;
+        }
+
+        .btn-primary:hover {
+            background-color: #08367a;
+        }
+
+        .btn-secondary {
+            border-radius: 10px;
+        }
+
+        table {
+            border-radius: 10px !important;
+            overflow: hidden;
+        }
+    </style>
 </head>
+
 <body>
+
 <div class="container mt-4">
-    <h3><i class="bi bi-layers"></i> Cadastro de Tipo de Espuma</h3>
 
-    <!-- Formulário de cadastro -->
-    <form method="POST" class="mb-4">
-        <div class="mb-3">
-            <label class="form-label">Nome do Tipo de Espuma</label>
-            <input type="text" name="nome" class="form-control" placeholder="Ex: D23, HR33, Soft..." required>
-        </div>
-        <button type="submit" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Adicionar
-        </button>
-    </form>
+    <h3 class="page-title mb-4">
+        <i class="bi bi-layers"></i> Cadastro de Tipo de Espuma
+    </h3>
 
-    <!-- Lista de espumas -->
-    <h5>Tipos de Espuma Cadastrados</h5>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for e in espumas %}
-            <tr>
-                <td>{{ e.id }}</td>
-                <td>{{ e.nome }}</td>
-                <td>
-                    <!-- Botão de edição -->
-                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editarModal{{ e.id }}">
-                        <i class="bi bi-pencil"></i> Editar
-                    </button>
+    <div class="card-custom mb-4">
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nome do Tipo de Espuma</label>
+                <input type="text" name="nome" class="form-control" placeholder="Ex: D23, D33, Soft..." required>
+            </div>
 
-                    <!-- Modal de edição -->
-                    <div class="modal fade" id="editarModal{{ e.id }}" tabindex="-1" aria-labelledby="editarModalLabel{{ e.id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <form method="POST" action="{{ url_for('editar_tipo_espuma', id=e.id) }}">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="editarModalLabel{{ e.id }}">Editar Tipo de Espuma</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label">Nome</label>
-                                            <input type="text" name="novo_nome" class="form-control" value="{{ e.nome }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <button type="submit" class="btn btn-success">Salvar Alterações</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Adicionar
+            </button>
+        </form>
+    </div>
 
-    <a href="{{ url_for('mostrar_ficha_tecnica') }}" class="btn btn-secondary mt-3">
-        <i class="bi bi-arrow-left"></i> Voltar
-    </a>
+    <div class="card-custom">
+        <h5 class="fw-bold mb-3">Tipos de Espuma Cadastrados</h5>
+
+        <table class="table table-striped align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in espumas %}
+                <tr>
+                    <td>{{ e.id }}</td>
+                    <td>{{ e.nome }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{{ url_for('mostrar_ficha_tecnica') }}" class="btn btn-secondary mt-3">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
 </div>
 </body>
 </html>
