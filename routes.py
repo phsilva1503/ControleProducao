@@ -499,17 +499,21 @@ def routes(app):
                 nome = request.form.get('nome', '').strip()
                 if not nome:
                     flash("Informe o nome da espuma!", "danger")
-                    return redirect(url_for('cadastrar_tipo_espuma'))
+                    ##return redirect(url_for('cadastrar_tipo_espuma'))
+                    return render_template('CadastroTipoEspuma.html', espumas=TipoEspuma.query.order_by(TipoEspuma.nome).all()) 
+                    
 
                 if TipoEspuma.query.filter_by(nome=nome).first():
                     flash("Este tipo de espuma já está cadastrado!", "warning")
-                    return redirect(url_for('cadastrar_tipo_espuma'))
+                   ##return redirect(url_for('cadastrar_tipo_espuma'))
+                    return render_template('CadastroTipoEspuma.html', espumas=TipoEspuma.query.order_by(TipoEspuma.nome).all())
 
                 nova = TipoEspuma(nome=nome)
                 db.session.add(nova)
                 db.session.commit()
                 flash(f"Tipo de espuma '{nome}' cadastrado com sucesso!", "success")
-                return redirect(url_for('cadastrar_tipo_espuma'))
+                ##return redirect(url_for('cadastrar_tipo_espuma'))
+                return render_template('CadastroTipoEspuma.html', espumas=TipoEspuma.query.order_by(TipoEspuma.nome).all())
 
             espumas = TipoEspuma.query.order_by(TipoEspuma.nome).all()
             return render_template('CadastroTipoEspuma.html', espumas=espumas)
