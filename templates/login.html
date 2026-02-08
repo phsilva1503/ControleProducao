@@ -29,10 +29,6 @@
             font-weight: 600;
         }
 
-        .form-group label {
-            font-weight: 500;
-        }
-
         .btn-primary {
             background-color: #003580;
             border: none;
@@ -40,10 +36,6 @@
 
         .btn-primary:hover {
             background-color: #002a66;
-        }
-
-        .text-muted {
-            color: #6c757d !important;
         }
 
         .forgot-password-link {
@@ -62,54 +54,13 @@
             padding: 30px 0;
         }
 
-        .footer-section a {
-            color: white;
-        }
-
-        .footer-section a:hover {
-            color: #e9ecef;
-        }
-
-        /* Estilo do Navbar - COR AZUL */
         .navbar {
-            background-color: #003580 !important; /* Cor azul para o navbar */
-            color: white;
+            background-color: #003580 !important;
         }
 
-        .navbar-brand {
-            color: white !important;
-        }
-
-        .navbar-brand:hover {
-            color: #e9ecef !important;
-        }
-
+        .navbar-brand,
         .navbar-nav .nav-link {
-            color: white !important; /* Links no navbar em branco */
-        }
-
-        .navbar-nav .nav-link:hover,
-        .navbar-nav .nav-link.active {
-            color: #e9ecef !important; /* Mudança de cor ao passar o mouse ou quando ativo */
-        }
-
-        .navbar-toggler {
-            border-color: white;
-        }
-
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"); /* Ícone do botão de toggle em branco */
-        }
-
-        .btn-outline-light {
-            color: white;
-            border-color: white;
-        }
-
-        .btn-outline-light:hover {
-            color: #003580;
-            background-color: white;
-            border-color: white;
+            color: white !important;
         }
     </style>
 </head>
@@ -122,35 +73,6 @@
                 <img src="{{ url_for('static', filename='imagens/logo-bonsono.png') }}" alt="Logo BonSono" width="40" height="40">
                 Plataforma de Gestão da Qualidade
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="index.html">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#laudo-tecnico">Laudo Técnico</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#controle-producao">Controle de Produção</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#lean-six-sigma">Lean Six Sigma</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#analise-preditiva">Análise Preditiva</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#dashboard">Dashboard</a>
-                    </li>
-                </ul>
-                <div class="d-flex">
-                    <a href="login.html" class="btn btn-outline-light me-2">Login</a>
-                    <a href="registrar.html" class="btn btn-primary">Registrar</a>
-                </div>
-            </div>
         </div>
     </nav>
 
@@ -160,6 +82,19 @@
             <div class="col-md-6">
                 <div class="card login-container">
                     <div class="card-body">
+
+                        <!-- MENSAGENS FLASH -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                          {% if messages %}
+                            {% for category, message in messages %}
+                              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                              </div>
+                            {% endfor %}
+                          {% endif %}
+                        {% endwith %}
+
                         <div class="text-center mb-4">
                             <i class="bi bi-person-circle fs-1 text-primary"></i>
                             <h2 class="mt-3">Acesse sua conta</h2>
@@ -171,7 +106,7 @@
                                 <label for="email" class="form-label">Email</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                    <input type="email" class="form-control" id="email" name="email" placeholder="seu@email.com" required>
+                                    <input type="email" class="form-control" id="email" name="email" required>
                                 </div>
                             </div>
 
@@ -179,25 +114,21 @@
                                 <label for="senha" class="form-label">Senha</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                    <input type="password" class="form-control" id="senha" name="senha" placeholder="********" required>
-                                    <a href="#" class="forgot-password-link">Esqueceu a senha?</a>
+                                    <input type="password" class="form-control" id="senha" name="senha" required>
                                 </div>
                             </div>
 
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" value="" id="rememberMe">
-                                <label class="form-check-label" for="rememberMe">
-                                    Manter conectado
-                                </label>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100">Entrar na conta</button>
+                            <button type="submit" class="btn btn-primary w-100">
+                                Entrar na conta
+                            </button>
                         </form>
 
                         <hr class="my-4">
 
                         <p class="text-center">Não tem conta ainda?</p>
-                        <a href="{{ url_for('cadastro_usuario') }}" class="btn btn-link text-center">Criar nova conta</a>
+                        <a href="{{ url_for('cadastro_usuario') }}" class="btn btn-link w-100">
+                            Criar nova conta
+                        </a>
                     </div>
                 </div>
             </div>
@@ -206,57 +137,13 @@
 
     <!-- Footer -->
     <footer class="footer-section mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5>Plataforma de Gestão da Qualidade</h5>
-                    <p>Soluções integradas para monitoramento, análise e melhoria contínua utilizando Lean Six Sigma e análise de dados.</p>
-                    <div class="d-flex gap-3">
-                        <a href="#" class="text-light"><i class="bi bi-facebook fs-4"></i></a>
-                        <a href="#" class="text-light"><i class="bi bi-twitter fs-4"></i></a>
-                        <a href="#" class="text-light"><i class="bi bi-instagram fs-4"></i></a>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5>Links Rápidos</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="index.html#laudo-tecnico" class="text-light text-decoration-none">Laudo Técnico</a></li>
-                        <li><a href="index.html#controle-producao" class="text-light text-decoration-none">Controle de Produção</a></li>
-                        <li><a href="index.html#lean-six-sigma" class="text-light text-decoration-none">Lean Six Sigma</a></li>
-                        <li><a href="index.html#analise-preditiva" class="text-light text-decoration-none">Análise Preditiva</a></li>
-                        <li><a href="index.html#dashboard" class="text-light text-decoration-none">Dashboard</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5>Contato</h5>
-                    <p><i class="bi bi-envelope me-2"></i> suporte@plataformagestaoqualidade.com</p>
-                    <p><i class="bi bi-geo-alt me-2"></i> Universidade Federal de Alagoas</p>
-                    <p><i class="bi bi-info-circle me-2"></i> Desenvolvido como parte do TCC</p>
-                </div>
-            </div>
-            <hr class="text-light my-4">
-            <p class="text-center mb-0">© 2025 Plataforma de Gestão da Qualidade. Todos os direitos reservados.</p>
+        <div class="container text-center">
+            <p class="mb-0">© 2025 Plataforma de Gestão da Qualidade</p>
         </div>
     </footer>
 
-    <!-- Bootstrap JS Bundle -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Script para mostrar/esconder senha
-        document.addEventListener('DOMContentLoaded', function() {
-            const togglePassword = document.querySelector('#togglePassword');
-            const password = document.querySelector('#senha');
-            
-            if (togglePassword) {
-                togglePassword.addEventListener('click', function () {
-                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-                    password.setAttribute('type', type);
-                    this.querySelector('i').classList.toggle('bi-eye');
-                    this.querySelector('i').classList.toggle('bi-eye-slash');
-                });
-            }
-        });
-    </script>
+
 </body>
 </html>
