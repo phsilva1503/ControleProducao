@@ -34,7 +34,7 @@ app.config['SECRET_KEY'] = '123'  # para produção, use algo seguro
 # 🔹 Configuração do banco (LOCAL x RENDER)
 if os.environ.get("RENDER"):
     # Caminho do volume persistente
-    volume_path = "/mnt/data"
+    volume_path = "/data"
     os.makedirs(volume_path, exist_ok=True)
     db_path = os.path.join(volume_path, "producao.db")
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
