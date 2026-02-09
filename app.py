@@ -25,10 +25,8 @@ IS_RENDER = os.environ.get("RENDER") is not None
 # BANCO DE DADOS
 # -----------------------
 if IS_RENDER:
-    # Volume persistente do Render
-    volume_path = "/data"
-    os.makedirs(volume_path, exist_ok=True)
-    db_path = os.path.join(volume_path, "producao.db")
+    # Render já monta o volume persistente em /data
+    db_path = "/data/producao.db"  # use diretamente, não faça makedirs
 else:
     # Ambiente local
     instance_path = os.path.join(base_dir, "instance")
