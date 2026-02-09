@@ -6,31 +6,31 @@ from routes import routes
 from flask_login import LoginManager
 
 # -----------------------
-# DIRETÓRIO BASE E VOLUME
+# DIRETÓRIO DE TEMPLATES
 # -----------------------
 base_dir = os.path.dirname(os.path.abspath(__file__))
-
-if os.environ.get("RENDER"):
-    # Ambiente Render
-    volume_path = "/data"  # volume configurado no Render
-    db_dir = os.path.join(volume_path, "sqlite")  # subpasta para gravar DB
-    os.makedirs(db_dir, exist_ok=True)
-    db_path = os.path.join(db_dir, "producao.db")
-else:
-    # Desenvolvimento local
-    instance_path = os.path.join(base_dir, "instance")
-    os.makedirs(instance_path, exist_ok=True)
-    db_path = os.path.join(instance_path, "producao.db")
-
-db_uri = f"sqlite:///{db_path}"
+template_dir = os.path.join(base_dir, "templates")
 
 # -----------------------
 # CONFIGURAÇÃO DO APP
 # -----------------------
-app = Flask(__name__, template_folder=os.path.join(base_dir, "templates"))
-app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = "123"  # em produção use variável de ambiente segura
+app = Flask(__name__, template_folder=template_dir)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = '123'  # Em produção, use variável de ambiente segura
+
+# -----------------------
+# BANCO DE DADOS (LOCAL x RENDER)
+# -----------------------
+if os.environ.get("RENDER"):
+    # Caminho do volume persistente no Render (não criar subpastas!)
+    db_path = "/data/producao.db"
+else:
+    # Banco local para desenvolvimento
+    instance_path = os.path.join(base_dir, "instance")
+    os.makedirs(instance_path, exist_ok=True)
+    db_path = os.path.join(instance_path, "producao.db")
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 
 # -----------------------
 # EXTENSÕES
