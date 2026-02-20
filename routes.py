@@ -647,6 +647,40 @@ def routes(app):
 
         # GET
         return render_template('cadastroUsuario.html')
+    
+    #----------------------------
+    #QUERY DE USUARIOS CADASTRADOS
+    #----------------------------
+    @app.route('/usuarios')
+    @login_required
+    def listar_usuarios():
+        usuarios = Usuario.query.order_by(Usuario.nome).all()
+        return render_template('Usuarios.html', usuarios=usuarios)
+
+    @app.route('/usuarios/status/<int:id>', methods=['POST'])
+    @login_required
+    def alterar_status_usuario(id):
+        usuario = Usuario.query.get_or_404(id)
+        usuario.ativo = not usuario.ativo  # alterna entre True e False
+        db.session.commit()
+        flash(f"Status do usuário {usuario.nome} alterado com sucesso!", "success")
+        return redirect(url_for('listar_usuarios'))
+    
+    @app.route('/usuario/<int:id>/senha', methods=['POST'])
+    @login_required
+    def alterar_senha_usuario(id):
+        usuario = Usuario.query.get_or_404(id)
+        nova_senha = request.form.get('nova_senha')
+        confirma_senha = request.form.get('confirma_senha')
+
+        if nova_senha != confirma_senha:
+            flash('As senhas não conferem!', 'danger')
+            return redirect(url_for('listar_usuarios'))
+
+        usuario.set_senha(nova_senha)
+        db.session.commit()
+        flash(f'Senha de {usuario.nome} alterada com sucesso!', 'success')
+        return redirect(url_for('listar_usuarios'))
 
 
 
