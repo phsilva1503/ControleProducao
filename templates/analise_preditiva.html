@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise Preditiva - Plataforma de Gestão da Qualidade</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Biblioteca para ler Excel/CSV no browser -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #1e40af, #1e3a8a);
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .upload-area {
+            border: 2px dashed #93c5fd;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Header/Navbar -->
+    <nav class="bg-blue-900 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-semibold">Plataforma de Gestão da Qualidade</span>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/" class="hover:bg-blue-800 px-3 py-2 rounded-md">Home</a>
+                    <a href="/laudo-tecnico" class="hover:bg-blue-800 px-3 py-2 rounded-md">Laudo Técnico</a>
+                    <a href="/controle-producao" class="hover:bg-blue-800 px-3 py-2 rounded-md">Controle de Produção</a>
+                    <a href="/lean-six-sigma" class="hover:bg-blue-800 px-3 py-2 rounded-md">Lean Six Sigma</a>
+                    <a href="/analise-preditiva" class="bg-blue-700 px-3 py-2 rounded-md">Análise Preditiva</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <i class="fas fa-brain text-blue-600 text-4xl"></i>
+                <h1 class="text-4xl font-bold text-gray-800">Análise Preditiva</h1>
+            </div>
+            <p class="text-gray-600 text-lg">
+                Realize previsões inteligentes de defeitos com base no histórico de assistência técnica
+            </p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-6 card">
+            <div class="flex items-center gap-3 mb-4">
+                <i class="fas fa-upload text-blue-600 text-2xl"></i>
+                <h2 class="text-2xl font-semibold text-gray-800">1. Importar Dados</h2>
+            </div>
+            
+            <!-- Upload Area -->
+            <div id="uploadArea" class="upload-area rounded-lg p-12 text-center cursor-pointer bg-blue-50">
+                <i class="fas fa-file-excel text-blue-500 text-6xl mb-4"></i>
+                <p class="mb-2 text-gray-700 font-medium">
+                    <span class="font-semibold">Clique para fazer upload</span> ou arraste o arquivo
+                </p>
+                <p class="text-sm text-gray-500">Excel (.xlsx, .xls) ou CSV com colunas: <code>produto, grupo, defeito</code></p>
+                <input type="file" id="fileInput" class="hidden" accept=".xlsx,.xls,.csv">
+            </div>
+
+            <!-- File Info -->
+            <div id="fileInfo" class="hidden bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                        <div>
+                            <p class="font-medium text-gray-800" id="fileName"></p>
+                            <p class="text-sm text-gray-600" id="fileSize"></p>
+                        </div>
+                    </div>
+                    <button id="removeFile" class="text-sm text-red-600 hover:text-red-700 font-medium">
+                        Remover
+                    </button>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="hidden mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
+                    <div>
+                        <p class="font-semibold text-gray-800">Erro ao processar arquivo</p>
+                        <p class="text-sm text-red-600" id="errorText"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success -->
+            <div id="modelSuccess" class="hidden mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                    <div>
+                        <p class="font-semibold text-gray-800">Dados carregados com sucesso!</p>
+                        <p class="text-sm text-gray-600">
+                            Registros válidos: <span class="font-bold text-blue-600" id="totalRecords"></span>
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Tipos de defeitos: <span id="numDefects"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prediction Form -->
+        <div id="predictionForm" class="hidden bg-white rounded-xl shadow-lg p-8 mb-6 card">
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fas fa-brain text-blue-600 text-2xl"></i>
+                <h2 class="text-2xl font-semibold text-gray-800">2. Realizar Previsão</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Produto
+                    </label>
+                    <select id="productSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+                        <option value="">Selecione o produto</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Região (Grupo)
+                    </label>
+                    <select id="groupSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+                        <option value="">Selecione a região</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="predictBtn" disabled class="w-full btn-primary text-white font-semibold py-3 px-6 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all">
+                🔍 Prever Defeito
+            </button>
+        </div>
+
+        <!-- Prediction Results -->
+        <div id="predictionResults" class="hidden bg-white rounded-xl shadow-lg p-8 card">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">✅ Resultado da Previsão</h2>
+            
+            <!-- Main Prediction -->
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 p-6 rounded-lg mb-6">
+                <p class="text-sm text-gray-600 mb-2">Defeito mais provável:</p>
+                <p class="text-3xl font-bold text-gray-800 mb-3" id="mainDefect"></p>
+                <div class="flex items-center gap-2">
+                    <div class="flex-1 bg-gray-200 rounded-full h-3">
+                        <div id="mainProgressBar" class="bg-gradient-to-r from-green-500 to-emerald-600 h-3 rounded-full progress-bar" style="width: 0%"></div>
+                    </div>
+                    <span class="text-lg font-bold text-green-700" id="mainConfidence"></span>
+                </div>
+            </div>
+
+            <!-- Detailed Predictions -->
+            <div>
+                <h3 class="font-semibold text-gray-800 mb-3">Detalhes da Previsão</h3>
+                <div id="detailedPredictions" class="space-y-3">
+                    <!-- Preenchido por JS -->
+                </div>
+            </div>
+
+            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+                <i class="fas fa-info-circle text-blue-600 text-xl mt-1"></i>
+                <p class="text-sm text-gray-700">
+                    <strong>Dica:</strong> Esta previsão é baseada em padrões históricos identificados nos dados de assistência técnica. 
+                    Use como referência para otimizar estoque de peças e preparação da equipe técnica.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeFile = document.getElementById('removeFile');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const modelSuccess = document.getElementById('modelSuccess');
+        const totalRecords = document.getElementById('totalRecords');
+        const numDefects = document.getElementById('numDefects');
+        const predictionForm = document.getElementById('predictionForm');
+        const productSelect = document.getElementById('productSelect');
+        const groupSelect = document.getElementById('groupSelect');
+        const predictBtn = document.getElementById('predictBtn');
+        const predictionResults = document.getElementById('predictionResults');
+        const mainDefect = document.getElementById('mainDefect');
+        const mainProgressBar = document.getElementById('mainProgressBar');
+        const mainConfidence = document.getElementById('mainConfidence');
+        const detailedPredictions = document.getElementById('detailedPredictions');
+
+        let historicalData = [];
+
+        // Eventos de upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#3b82f6';
+            uploadArea.style.backgroundColor = '#dbeafe';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#93c5fd';
+            uploadArea.style.backgroundColor = '#eff6ff';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#93c5fd';
+            uploadArea.style.backgroundColor = '#eff6ff';
+            const file = e.dataTransfer.files[0];
+            if (file) processFile(file);
+        });
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) processFile(file);
+        });
+        removeFile.addEventListener('click', resetForm);
+        productSelect.addEventListener('change', checkFormValidity);
+        groupSelect.addEventListener('change', checkFormValidity);
+        predictBtn.addEventListener('click', handlePredict);
+
+        function processFile(file) {
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024).toFixed(2) + ' KB';
+            fileInfo.classList.remove('hidden');
+            uploadArea.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            modelSuccess.classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    let jsonData = [];
+
+                    if (file.name.endsWith('.csv')) {
+                        const text = new TextDecoder().decode(data);
+                        const workbook = XLSX.read(text, { type: 'string', cellDates: true });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        jsonData = XLSX.utils.sheet_to_json(sheet);
+                    } else {
+                        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        jsonData = XLSX.utils.sheet_to_json(sheet);
+                    }
+
+                    // Validar colunas (case-insensitive)
+                    if (jsonData.length === 0) throw new Error('Arquivo vazio');
+                    const firstRow = jsonData[0];
+                    const keys = Object.keys(firstRow).map(k => k.toLowerCase());
+                    const hasProduto = keys.some(k => k.includes('produto') || k === 'produto');
+                    const hasGrupo = keys.some(k => k.includes('grupo') || k === 'grupo' || k.includes('regiao'));
+                    const hasDefeito = keys.some(k => k.includes('defeito') || k.includes('motivo') || k === 'defeito');
+
+                    if (!hasProduto || !hasGrupo || !hasDefeito) {
+                        throw new Error('Arquivo deve conter colunas: produto, grupo, defeito');
+                    }
+
+                    // Normalizar chaves
+                    historicalData = jsonData.map(row => {
+                        const obj = {};
+                        for (const key of Object.keys(row)) {
+                            const k = key.toLowerCase();
+                            if (k.includes('produto')) obj.produto = String(row[key]).trim();
+                            else if (k.includes('grupo') || k.includes('regiao')) obj.grupo = String(row[key]).trim();
+                            else if (k.includes('defeito') || k.includes('motivo')) obj.defeito = String(row[key]).trim();
+                        }
+                        return obj;
+                    }).filter(row => row.produto && row.grupo && row.defeito);
+
+                    if (historicalData.length === 0) throw new Error('Nenhum registro válido encontrado');
+
+                    // Atualizar UI
+                    totalRecords.textContent = historicalData.length;
+                    const defectTypes = new Set(historicalData.map(r => r.defeito)).size;
+                    numDefects.textContent = defectTypes;
+                    modelSuccess.classList.remove('hidden');
+                    buildSelects();
+                    predictionForm.classList.remove('hidden');
+
+                } catch (err) {
+                    showError(err.message);
+                }
+            };
+            reader.onerror = () => showError('Erro ao ler o arquivo');
+            reader.readAsArrayBuffer(file);
+        }
+
+        function buildSelects() {
+            const products = [...new Set(historicalData.map(r => r.produto))];
+            const groups = [...new Set(historicalData.map(r => r.grupo))];
+
+            productSelect.innerHTML = '<option value="">Selecione o produto</option>' +
+                products.map(p => `<option value="${p}">${p}</option>`).join('');
+            
+            groupSelect.innerHTML = '<option value="">Selecione a região</option>' +
+                groups.map(g => `<option value="${g}">${g}</option>`).join('');
+        }
+
+        function handlePredict() {
+            const product = productSelect.value;
+            const group = groupSelect.value;
+
+            // Filtrar dados com base na seleção
+            let matches = historicalData.filter(r =>
+                r.produto === product && r.grupo === group
+            );
+
+            // Se não houver combinação exata, usar todo o histórico
+            if (matches.length === 0) matches = historicalData;
+
+            // === FILTRO ADICIONADO AQUI ===
+            const EXCLUDED_DEFECTS = [
+            "(AUTORIZADA PELO DIRETOR)",
+            "(AUTORIZADA POR IVO BARRETO)"
+             ];
+            const count = {};
+            matches.forEach(r => {
+                if (!EXCLUDED_DEFECTS.includes(r.defeito)) {
+                    count[r.defeito] = (count[r.defeito] || 0) + 1;
+                }
+            });
+
+            // Caso todos os registros tenham sido excluídos, usar os dados originais
+            if (Object.keys(count).length === 0) {
+                matches.forEach(r => {
+                    count[r.defeito] = (count[r.defeito] || 0) + 1;
+                });
+            }
+            // ==============================
+
+            const total = Object.values(count).reduce((sum, val) => sum + val, 0);
+            const predictions = Object.entries(count)
+                .map(([defeito, qtd]) => ({
+                    defeito,
+                    confianca: (qtd / total) * 100
+                }))
+                .sort((a, b) => b.confianca - a.confianca)
+                .slice(0, 5);
+
+            // Mostrar resultado
+            const main = predictions[0];
+            mainDefect.textContent = main.defeito;
+            mainConfidence.textContent = main.confianca.toFixed(1) + '%';
+            mainProgressBar.style.width = main.confianca + '%';
+
+            detailedPredictions.innerHTML = '';
+            predictions.forEach(pred => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+                div.innerHTML = `
+                    <span class="text-gray-700">${pred.defeito}</span>
+                    <div class="flex items-center gap-3">
+                        <div class="w-32 bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: ${pred.confianca}%"></div>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700 w-12 text-right">
+                            ${pred.confianca.toFixed(1)}%
+                        </span>
+                    </div>
+                `;
+                detailedPredictions.appendChild(div);
+            });
+
+            predictionResults.classList.remove('hidden');
+            predictionResults.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function checkFormValidity() {
+            predictBtn.disabled = !(productSelect.value && groupSelect.value);
+        }
+
+        function showError(msg) {
+            errorText.textContent = msg;
+            errorMessage.classList.remove('hidden');
+            fileInfo.classList.add('hidden');
+            uploadArea.classList.remove('hidden');
+        }
+
+        function resetForm() {
+            fileInput.value = '';
+            fileInfo.classList.add('hidden');
+            uploadArea.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            modelSuccess.classList.add('hidden');
+            predictionForm.classList.add('hidden');
+            predictionResults.classList.add('hidden');
+            productSelect.innerHTML = '<option value="">Selecione o produto</option>';
+            groupSelect.innerHTML = '<option value="">Selecione a região</option>';
+            predictBtn.disabled = true;
+            historicalData = [];
+        }
+    </script>
+</body>
+</html>

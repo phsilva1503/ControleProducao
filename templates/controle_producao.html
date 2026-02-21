@@ -8,11 +8,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Ícones do Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
     <!-- CSS Personalizado -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
-<body class = "pagina-controle-producao">
+<body class="pagina-controle-producao">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container-fluid">
@@ -55,32 +54,33 @@
                         <h5 class="section-title">
                             <i class="bi bi-menu-button-wide"></i> Operações
                         </h5>
-
                         <!-- Menu item for technical data sheet registration -->
                         <div class="menu-item" onclick="mostrarTela('fichaTecnica')">
-                        <i class="bi bi-clipboard-data"></i>  Cadastro de Ficha Técnica
-                        </div> 
-
-                    
+                            <i class="bi bi-clipboard-data"></i>  Cadastro de Ficha Técnica
+                        </div>
                         <div class="menu-item active" onclick="mostrarTela('cadastro')">
-                            
                             <i class="bi bi-file-earmark-text"></i> Cadastro de Produção
                         </div>
-
                         <div class="menu-item" onclick="mostrarTela('Produções')">
                             <i class="bi bi-box-seam"></i> Produções cadastradas
                         </div>
-
                         <div class="menu-item" onclick="mostrarTela('Componentes')">
-                            <i class="bi bi-box-seam"></i></i> Componentes
+                            <i class="bi bi-box-seam"></i> Componentes
                         </div>
-
                         <div class="menu-item " onclick="mostrarTela('estoque')">
                             <i class="bi bi-box-seam"></i> Estoque Atual
                         </div>
-                        <div class="menu-item" onclick="mostrarTela('historico')">
-                            <i class="bi bi-graph-up"></i> Histórico e Gráficos
-                        </div>
+                        <!-- Histórico e Gráficos - Link para Streamlit Cloud -->
+                        <a class="menu-item text-decoration-none d-flex align-items-center"
+                           href="https://dashboard-plataforma-err6cvzmsqkadji2bh7b75.streamlit.app/"
+                           rel="noopener noreferrer"
+                           target="_blank"
+                           style="color: inherit; padding: 8px 12px; border-radius: 4px;"
+                           onmouseover="this.style.backgroundColor='#f8f9'"
+                           onmouseout="this.style.backgroundColor='transparent'">
+                            <i class="bi bi-graph-up me-2"></i> Histórico e Gráficos
+                        </a>
+                        <!-- Fórmulas Químicas - Link para tela interna -->
                         <div class="menu-item" onclick="mostrarTela('formulas')">
                             <i class="bi bi-journal-text"></i> Fórmulas Químicas
                         </div>
@@ -98,22 +98,22 @@
             <!-- Coluna Direita: Conteúdo Dinâmico -->
             <div class="col-md-9">
                 <!-- Tela: Cadastro de Bloco -->
-                <div id="tela-cadastro" class="card ">
+                <div id="tela-cadastro" class="card">
                     <div class="card-body">
                         <h4 class="section-title">
                             <i class="bi bi-clipboard-check"></i> Cadastro de Bloco de Espuma
                         </h4>
                         <!-- ✅ BLOCO DE MENSAGENS FLASH -->
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                        </div>
-                        {% endfor %}
-                    {% endif %}
-                    {% endwith %}
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                        {% endwith %}
 
                         <!-- FORMULÁRIO DE CADASTRO DE PRODUÇÃO  - CORRIGIR FORMS DINAMICOS-->
                         <form id="formulario-bloco" method="POST" action="{{ url_for('cadastro_producao') }}">
@@ -137,7 +137,6 @@
                                             <option value="{{ tipo.id }}">{{ tipo.nome }}</option>
                                         {% endfor %}
                                     </select>
-
                                 </div>
                                 <div class="col-md-6">
                                     <label for="cor" class="form-label">Cor:</label>
@@ -175,75 +174,78 @@
                                 <textarea class="form-control" id="observacoes" name="observacoes" rows="3"></textarea>
                             </div>
                             
-                            
                             <h5 class="section-title mt-4">
-                                <i class="bi bi-flask"></i> Quantidade de Produtos Usados (em kg)
+                                <i class="bi bi-flask"></i> Quantidade de Produtos Usados (em kg ou g)
                             </h5>
                             
-                            <!-- Campos para entrada de quantidade de produtos químicos usados 
-                            <div class="row g-3">
-                                {% for componente in componentes %}
-                                <div class="col-md-4 componente-item" data-componente-id="{{ componente.id }}">
-                                    <label for="componente_{{ componente.id }}" class="form-label">{{ componente.nome }} (kg):</label>
-                                    <input type="number" class="form-control" id="componente_{{ componente.id }}" name="componente_{{ componente.id }}" step="0.01" min="0" value="0">
-                                </div>
-                                {% endfor %}
-                            </div>-->
-
                             <!-- container que será preenchido dinamicamente -->
                             <div id="lista_componentes" class="row g-3">
                                 <script>
-                            document.addEventListener("DOMContentLoaded", function() {
-                                const selectTipo = document.getElementById("tipo_espuma");
-                                const listaComponentes = document.getElementById("lista_componentes");
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    const selectTipo = document.getElementById("tipo_espuma");
+                                    const listaComponentes = document.getElementById("lista_componentes");
 
-                                async function carregarComponentes(tipoId) {
-                                    if (!tipoId) {
-                                        listaComponentes.innerHTML = ""; // limpa se não selecionar nada
-                                        return;
+                                    async function carregarComponentes(tipoId) {
+                                        if (!tipoId) {
+                                            listaComponentes.innerHTML = ""; // limpa se não selecionar nada
+                                            return;
+                                        }
+
+                                        try {
+                                            const res = await fetch(`/componentes_por_tipo/${tipoId}`);
+                                            if (!res.ok) throw new Error("Erro ao buscar componentes");
+                                            const componentes = await res.json();
+
+                                            // limpar
+                                            listaComponentes.innerHTML = "";
+
+                                            // gerar inputs — colocamos value=0 por padrão
+                                            componentes.forEach(c => {
+                                                const html = `
+                                                <div class="col-md-4 componente-item" data-componente-id="${c.id}">
+                                                    <label for="componente_${c.id}" class="form-label">${c.nome} (kg ou g):</label>
+                                                    <input type="number" class="form-control" id="componente_${c.id}" name="componente_${c.id}" step="0.01" min="0" value="0">
+                                                </div>`;
+                                                listaComponentes.insertAdjacentHTML('beforeend', html);
+                                            });
+
+                                        } catch (err) {
+                                            console.error(err);
+                                            // opcional: mostrar mensagem visual ao usuário
+                                        }
                                     }
 
-                                    try {
-                                        const res = await fetch(`/componentes_por_tipo/${tipoId}`);
-                                        if (!res.ok) throw new Error("Erro ao buscar componentes");
-                                        const componentes = await res.json();
+                                    // carregar componentes se já existir um valor selecionado (edição/refresh)
+                                    if (selectTipo && selectTipo.value) {
+                                        carregarComponentes(selectTipo.value);
+                                    }
 
-                                        // limpar
-                                        listaComponentes.innerHTML = "";
-
-                                        // gerar inputs — colocamos value=0 por padrão
-                                        componentes.forEach(c => {
-                                            const html = `
-                                            <div class="col-md-4 componente-item" data-componente-id="${c.id}">
-                                                <label for="componente_${c.id}" class="form-label">${c.nome} (kg):</label>
-                                                <input type="number" class="form-control" id="componente_${c.id}" name="componente_${c.id}" step="0.01" min="0" value="0">
-                                            </div>`;
-                                            listaComponentes.insertAdjacentHTML('beforeend', html);
+                                    if (selectTipo) {
+                                        selectTipo.addEventListener("change", function() {
+                                            carregarComponentes(this.value);
                                         });
-
-                                    } catch (err) {
-                                        console.error(err);
-                                        // opcional: mostrar mensagem visual ao usuário
                                     }
-                                }
-
-                                // carregar componentes se já existir um valor selecionado (edição/refresh)
-                                if (selectTipo && selectTipo.value) {
-                                    carregarComponentes(selectTipo.value);
-                                }
-
-                                if (selectTipo) {
-                                    selectTipo.addEventListener("change", function() {
-                                        carregarComponentes(this.value);
-                                    });
-                                }
-                            });
-                            </script>
+                                });
+                                </script>
 
                                 <!-- JS vai injetar aqui os inputs do componente -->
                             </div>
+                            <!-- 🧠 ASSISTENTE IA DE PRODUÇÃO --> 
+                        <div class="card mt-4 border-info shadow-sm" id="ia-assistente">
+                              <div class="card-header bg-info text-white d-flex align-items-center">
+                                <i class="bi bi-cpu me-2"></i>
+                                <strong>Assistente Inteligente de Produção</strong>
+                            </div>
+                            <div class="card-body">
+                              <p class="text-muted mb-2">
+                                  A IA analisa os dados preenchidos e compara com o histórico de produção.
+                              </p>
 
-
+                               <div id="ia-feedback" class="alert alert-secondary mb-0">
+                                ⏳ Aguardando dados do preenchimento...
+                               </div>
+                            </div>
+                        </div>
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                                 <button type="submit" class="btn btn-primary">
@@ -253,9 +255,6 @@
                         </form>
                     </div>
                 </div>
-
-                
-
 
                 <!-- Tela: Estoque Atual -->
                 <div id="tela-estoque" class="card d-none">
@@ -286,7 +285,7 @@
                                         <td>{{ "%.2f"|format(saldo)|replace('.', ',') }}</td>
                                         <td><span class="badge {{ badge_class }}">{{ status }}</span></td>
                                         <td>
-                                            <a href="{{ url_for('ajustar_estoque', componente_id=componente.id) }}" class="btn btn-sm btn-warning me-1">Ajuste</a>
+                                            <a href="{{ url_for('ajustar_estoque', componente_id=componente.id) }}" class="btn btn-sm btn-warning me-1">Ajustar</a>
                                             <a href="{{ url_for('movimentacoes', componente_id=componente.id) }}" class="btn btn-sm btn-movimentacoes">Movimentações</a>
                                         </td>
                                     </tr>
@@ -341,7 +340,7 @@
                                         <td class="text-center">
                                             <a href="{{ url_for('ver_componentes_producao', producao_id=producao.id) }}"
                                             class="btn btn-outline-primary btn-sm" title="Ver Componentes" data-bs-toggle="tooltip">
-                                                <i class="bi bi-archive"></i>
+                                                <i class="bi bi-eye"></i>  <!-- Ícone de "olho" para visualização -->
                                             </a>
                                         </td>
                                         <td>{{ producao.usuario.nome }}</td>
@@ -358,8 +357,7 @@
                     </div>
                 </div>
 
-                
-                <div id="tela-Componentes" class="card ">
+                <div id="tela-Componentes" class="card d-none">
                     <div class="card-body">
                         <h4 class="section-title mb-4">
                         <i class="bi bi-tools"></i> Cadastro de Componentes
@@ -448,159 +446,236 @@
                     </div>
                 </div>
 
-                
-    <!-- ✅ Botões de acesso -->
-    
+                <!-- 🟦 Bloco principal da Ficha Técnica -->
+                <div id="tela-fichaTecnica" class="card d-none">
+                    <div class="card-body">
+                        <h4 class="section-title"><i class="bi bi-clipboard-data"></i> Ficha Técnica</h4>
 
+                        <!-- Formulário de cadastro -->
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0"><i class="bi bi-clipboard-data"></i> Cadastro de Ficha Técnica</h4>
+                                <a href="{{ url_for('index') }}" class="btn btn-light btn-sm">
+                                    <i class="bi bi-arrow-left-circle"></i> Voltar
+                                </a>
+                            </div>
+                        <div class="d-flex justify-content-end mb-3" style="margin-top: 15px; margin-right: 15px;">   
 
-<!-- 🟦 Bloco principal da Ficha Técnica -->
-<div id="tela-fichaTecnica" class="card d-none">
-    <div class="card-body">
-        <h4 class="section-title"><i class="bi bi-clipboard-data"></i> Ficha Técnica</h4>
-
-  
-
-        <!-- Formulário de cadastro -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h4 class="mb-0"><i class="bi bi-clipboard-data"></i> Cadastro de Ficha Técnica</h4>
-                <a href="{{ url_for('index') }}" class="btn btn-light btn-sm">
-                    <i class="bi bi-arrow-left-circle"></i> Voltar
-                </a>
-            </div>
-        <div class="d-flex justify-content-end mb-3" style="margin-top: 15px; margin-right: 15px;">   
-
-            <a href="{{ url_for('cadastrar_tipo_espuma') }}" class="btn btn-outline-success">
-                <i class="bi bi-plus-circle"></i> Cadastrar Tipo de Espuma
-            </a>
-        </div>
-
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('cadastrar_ficha_tecnica') }}">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="tipo_espuma" class="form-label fw-bold">Tipo de Espuma</label>
-                            <select class="form-select" id="tipo_espuma" name="tipo_espuma_id" required>
-                                <option value="">Selecione...</option>
-                                {% for tipo in tipos_espuma %}
-                                    <option value="{{ tipo.id }}" {% if request.form.get('tipo_espuma_id') == tipo.id|string %}selected{% endif %}>
-                                        {{ tipo.nome }}
-                                    </option>
-                                {% endfor %}
-                            </select>
+                            <a href="{{ url_for('cadastrar_tipo_espuma') }}" class="btn btn-outline-success">
+                                <i class="bi bi-plus-circle"></i> Cadastrar Tipo de Espuma
+                            </a>
                         </div>
 
+                            <div class="card-body">
+                                <form method="POST" action="{{ url_for('cadastrar_ficha_tecnica') }}">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="tipo_espuma" class="form-label fw-bold">Tipo de Espuma</label>
+                                            <select class="form-select" id="tipo_espuma" name="tipo_espuma_id" required>
+                                                <option value="">Selecione...</option>
+                                                {% for tipo in tipos_espuma %}
+                                                    <option value="{{ tipo.id }}" {% if request.form.get('tipo_espuma_id') == tipo.id|string %}selected{% endif %}>
+                                                        {{ tipo.nome }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
 
-                    <hr>
+                                    <hr>
 
-                    <h5 class="fw-bold mb-3"><i class="bi bi-flask"></i> Componentes</h5>
-                    <div class="row">
-                        {% for componente in componentes %}
-                        <div class="col-md-4 mb-2">
-                            <div class="form-check">
-                                <input  class="form-check-input" type="checkbox"
-                                        id="componente_{{ componente.id }}"
-                                        name="componentes_ids"
-                                        value="{{ componente.id }}">
-                                <label class="form-check-label" for="componente_{{ componente.id }}">
-                                    {{ componente.nome }}
-                                </label>
+                                    <h5 class="fw-bold mb-3"><i class="bi bi-flask"></i> Componentes</h5>
+                                    <div class="row">
+                                        {% for componente in componentes %}
+                                        <div class="col-md-4 mb-2">
+                                            <div class="form-check">
+                                                <input  class="form-check-input" type="checkbox"
+                                                        id="componente_{{ componente.id }}"
+                                                        name="componentes_ids"
+                                                        value="{{ componente.id }}">
+                                                <label class="form-check-label" for="componente_{{ componente.id }}">
+                                                    {{ componente.nome }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="text-end mt-4">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-save"></i> Salvar Ficha Técnica
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-                        {% endfor %}
-                    </div>
 
-                    <div class="text-end mt-4">
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-save"></i> Salvar Ficha Técnica
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Mensagens Flash -->
-        <div class="mt-3">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </div>
-
-        <!-- 🟢 Lista de Fichas Técnicas -->
-        <div class="card mt-4 shadow-sm">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0"><i class="bi bi-card-list"></i> Fichas Técnicas Cadastradas</h5>
-            </div>
-
-            <div class="card-body">
-                <p><strong>Total de fichas:</strong> {{ fichas|length }}</p>
-
-                {% if fichas %}
-                    <table class="table table-bordered table-striped align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 5%;">#</th>
-                                <th style="width: 20%;">Tipo de Espuma</th>
-                                <th style="width: 25%;">Descrição</th>
-                                <th style="width: 35%;">Componentes</th>
-                                <th style="width: 15%;" class="text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ficha in fichas %}
-                            <tr>
-                                <td>{{ ficha.id }}</td>
-                                <td>{{ ficha.tipo_espuma.nome }}</td>
-                                <td>{{ ficha.descricao or '-' }}</td>
-                                <td>
-                                    {% if ficha.componentes %}
-                                        {% for rel in ficha.componentes %}
-                                            {{ rel.componente.nome }}{% if not loop.last %}, {% endif %}
-                            {% endfor %}
-                                {% else %}
-                                    <span class="text-muted">Sem componentes</span>
+                        <!-- Mensagens Flash -->
+                        <div class="mt-3">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, message in messages %}
+                                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                            {{ message }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+                                    {% endfor %}
                                 {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    <a href="{{ url_for('editar_ficha_tecnica', ficha_id=ficha.id) }}" 
-                                       class="btn btn-sm btn-warning">
-                                        <i class="bi bi-pencil-square"></i> Editar
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <p class="text-muted">Nenhuma ficha técnica cadastrada ainda.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+                            {% endwith %}
+                        </div>
 
+                        <!-- 🟢 Lista de Fichas Técnicas -->
+                        <div class="card mt-4 shadow-sm">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0"><i class="bi bi-card-list"></i> Fichas Técnicas Cadastradas</h5>
+                            </div>
 
+                            <div class="card-body">
+                                <p><strong>Total de fichas:</strong> {{ fichas|length }}</p>
+
+                                {% if fichas %}
+                                    <table class="table table-bordered table-striped align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 5%;">#</th>
+                                                <th style="width: 20%;">Tipo de Espuma</th>
+                                                <th style="width: 25%;">Descrição</th>
+                                                <th style="width: 35%;">Componentes</th>
+                                                <th style="width: 15%;" class="text-center">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for ficha in fichas %}
+                                            <tr>
+                                                <td>{{ ficha.id }}</td>
+                                                <td>{{ ficha.tipo_espuma.nome }}</td>
+                                                <td>{{ ficha.descricao or '-' }}</td>
+                                                <td>
+                                                    {% if ficha.componentes %}
+                                                        {% for rel in ficha.componentes %}
+                                                            {{ rel.componente.nome }}{% if not loop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <span class="text-muted">Sem componentes</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="{{ url_for('editar_ficha_tecnica', ficha_id=ficha.id) }}" 
+                                                    class="btn btn-sm btn-warning">
+                                                        <i class="bi bi-pencil-square"></i> Editar
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                    <p class="text-muted">Nenhuma ficha técnica cadastrada ainda.</p>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Telas futuras (placeholders) -->
+                <!-- Tela: Histórico e Gráficos (placeholder - agora é link externo) -->
                 <div id="tela-historico" class="card d-none">
                     <div class="card-body">
                         <h4 class="section-title"><i class="bi bi-graph-up"></i> Histórico e Gráficos</h4>
-                        <p class="text-muted">Funcionalidade em desenvolvimento.</p>
+                        <p class="text-muted">Esta funcionalidade está disponível em nosso dashboard externo. Clique no menu lateral para acessar.</p>
                     </div>
                 </div>
+
+                <!-- Tela: Fórmulas Químicas - Versão completa -->
                 <div id="tela-formulas" class="card d-none">
                     <div class="card-body">
-                        <h4 class="section-title"><i class="bi bi-journal-text"></i> Fórmulas Químicas</h4>
-                        <p class="text-muted">Funcionalidade em desenvolvimento.</p>
+                        <h4 class="section-title mb-4">
+                            <i class="bi bi-journal-text"></i> Fórmulas Químicas - BonSono
+                        </h4>
+                        
+                        <!-- Card principal com acesso ao Drive -->
+                        <div class="card shadow-sm border-0 mb-4" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                            <div class="card-body p-4 text-center">
+                                <div class="mb-3">
+                                    <i class="bi bi-google display-1 text-danger"></i>
+                                </div>
+                                <h5 class="card-title fw-bold mb-2 text-primary">
+                                    Repositório Corporativo de Fórmulas
+                                </h5>
+                                <p class="card-text text-muted mb-4">
+                                    Acesso centralizado a todas as fórmulas químicas, proporções e documentação técnica da BonSono
+                                </p>
+                                <a href="https://drive.google.com/drive/u/1/folders/1Dzdbxy5PuWwfIsf0-UeBedWnzwhjPxnd"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="btn btn-danger btn-lg px-5 py-3 fw-bold shadow">
+                                    <i class="bi bi-folder2-open me-2"></i> Acessar Google Drive
+                                </a>
+                                <div class="mt-3 text-muted small">
+                                    <i class="bi bi-lock-fill"></i> Acesso restrito a colaboradores autorizados
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Documentos disponíveis -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0 fw-bold"><i class="bi bi-file-earmark-text me-2"></i> Conteúdo Disponível</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-check-circle-fill text-success mt-1 me-2"></i>
+                                            <div>Fórmulas padrão (D23, D28, D33)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-check-circle-fill text-success mt-1 me-2"></i>
+                                            <div>Fórmulas especiais (Soft, HR, Memory)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-check-circle-fill text-success mt-1 me-2"></i>
+                                            <div>Tabelas de proporção por densidade</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-check-circle-fill text-success mt-1 me-2"></i>
+                                            <div>Manuais técnicos e MSDS</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dica de segurança -->
+                        <div class="alert alert-warning border-warning mb-4">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2 mt-1"></i>
+                                <div>
+                                    <strong>Atenção:</strong> Sempre utilize as versões mais recentes das fórmulas.
+                                    Consulte o responsável técnico antes de qualquer alteração nos parâmetros de produção.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Instruções de acesso -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0 fw-bold"><i class="bi bi-question-circle me-2"></i> Como Acessar</h6>
+                            </div>
+                            <div class="card-body">
+                                <ol class="mb-0 ps-3">
+                                    <li>Clique no botão <strong>"Acessar Google Drive"</strong> acima</li>
+                                    <li>Faça login com sua conta corporativa BonSono (@bonsomo.com.br)</li>
+                                    <li>Navegue pelas pastas organizadas por tipo de espuma</li>
+                                    <li>Para download: clique com botão direito → "Fazer download"</li>
+                                </ol>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -608,38 +683,77 @@
     </div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>    
-        // Navegação entre telas
-        function mostrarTela(tela) {
-            document.querySelectorAll('.col-md-9 > .card').forEach(el => el.classList.add('d-none'));
-            const alvo = document.getElementById('tela-' + tela);
-            if (alvo) alvo.classList.remove('d-none');
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-            event?.currentTarget?.classList.add('active');
+<!-- Script principal - NAVEGAÇÃO ENTRE TELAS -->
+<script>
+// Navegação entre telas
+function mostrarTela(tela) {
+    document.querySelectorAll('.col-md-9 > .card').forEach(el => el.classList.add('d-none'));
+    const alvo = document.getElementById('tela-' + tela);
+    if (alvo) alvo.classList.remove('d-none');
+    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+    if (event?.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
+}
+
+// Busca no estoque
+document.getElementById('search-estoque')?.addEventListener('input', function() {
+    const term = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#estoque-tbody tr');
+    rows.forEach(row => {
+        const nome = row.cells[0].textContent.toLowerCase();
+        row.style.display = nome.includes(term) ? '' : 'none';
+    });
+});
+
+// Tooltips (opcional)
+document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+    new bootstrap.Tooltip(el, { placement: 'top' });
+});
+
+// IA Feedback
+document.addEventListener("input", function () {
+    const feedback = document.getElementById("ia-feedback");
+    if (!feedback) return;
+    const altura = parseFloat(document.getElementById("altura")?.value);
+    const tipoEspuma = document.getElementById("tipo_espuma")?.value;
+    if (!tipoEspuma || !altura) {
+        feedback.className = "alert alert-secondary mb-0";
+        feedback.innerHTML = "⏳ Aguardando dados do preenchimento...";
+        return;
+    }
+    if (altura < 96) {
+        feedback.className = "alert alert-warning mb-0";
+        feedback.innerHTML = "⚠️ Altura abaixo do padrão histórico para este tipo de espuma. Pode indicar erro de dosagem.";
+    }
+    else if (altura > 120) {
+        feedback.className = "alert alert-warning mb-0";
+        feedback.innerHTML = "⚠️ Altura acima do padrão histórico para este tipo de espuma. Risco de variação de densidade.";
+    }
+    else {
+        feedback.className = "alert alert-success mb-0";
+        feedback.innerHTML = "✅ Altura dentro da faixa histórica ideal para este tipo de espuma.";
+    }
+}
+)
+// ✅ Script de inicialização - EXECUTA APÓS todas as funções estarem definidas
+document.addEventListener('DOMContentLoaded', function() {
+    // Verifica se estamos na página de controle de produção
+    const isControleProducao = window.location.pathname.includes('/controle_producao');
+    
+    if (isControleProducao) {
+        // Mostra a tela de cadastro
+        mostrarTela('cadastro');
+        
+        // Marca o menu como ativo
+        const cadastroMenu = document.querySelector('.menu-item[onclick*="mostrarTela(\'cadastro\')"]');
+        if (cadastroMenu) {
+            cadastroMenu.classList.add('active');
         }
-
-        // Busca no estoque
-        document.getElementById('search-estoque')?.addEventListener('input', function() {
-            const term = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#estoque-tbody tr');
-            let count = 0;
-            rows.forEach(row => {
-                const nome = row.cells[0].textContent.toLowerCase();
-                if (nome.includes(term)) {
-                    row.style.display = '';
-                    count++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-
-        // Tooltips (opcional)
-        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-            new bootstrap.Tooltip(el, { placement: 'top' });
-        });
-    </script>
+    }
+});
+</script>
 </body>
 </html>

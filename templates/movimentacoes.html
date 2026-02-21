@@ -36,6 +36,7 @@
                     {% for mov in movimentacoes %}
                     <tr>
                         <td>{{ mov.id }}</td>
+
                         <td>
                             {% if mov.tipo == 'entrada' %}
                                 <span class="badge rounded-pill bg-success px-3 py-2">Entrada</span>
@@ -45,8 +46,11 @@
                                 <span class="badge rounded-pill bg-secondary px-3 py-2">{{ mov.tipo|capitalize }}</span>
                             {% endif %}
                         </td>
+
                         <td>{{ "%.2f"|format(mov.quantidade)|replace('.', ',') }}</td>
+
                         <td>{{ mov.data.strftime('%d/%m/%Y') if mov.data else '-' }}</td>
+
                         <td>{{ mov.producao_id if mov.producao_id else '-' }}</td>
                     </tr>
                     {% endfor %}
@@ -58,8 +62,11 @@
             <i class="bi bi-info-circle me-2"></i> Nenhuma movimentação registrada para este componente.
         </div>
         {% endif %}
+
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

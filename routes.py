@@ -458,8 +458,8 @@ def routes(app):
                 descricao = request.form.get('descricao', '')
 
                 try:
-                    tipo_espuma_id_int = int(tipo_espuma_id)
-                except ValueError:
+                    tipo_espusma_id_int = int(tipo_espuma_id)
+                except (ValueError, TypeError):  # Agora captura AMBOS ValueError E TypeError
                     flash("Valor inválido para tipo de espuma!", "danger")
                     return redirect(url_for('editar_ficha_tecnica', ficha_id=ficha.id))
 
@@ -648,6 +648,203 @@ def routes(app):
         # GET
         return render_template('cadastroUsuario.html')
 
+    # =====================================================================
+    # 🧠 ASSISTENTE IA - ANÁLISE EM TEMPO REAL DE FORMULAÇÃO
+    # =====================================================================
+    @app.route('/api/ia-analise-producao', methods=['POST'])
+    @login_required
+    def ia_analise_producao():
+        """
+        Analisa em tempo real os parâmetros de produção comparando com histórico.
+        Recebe: {tipo_espuma_id: int, altura: float, componentes: {componente_X: valor}}
+        Retorna: {alertas: [{severidade, mensagem}], recomendacao: str}
+        """
+        dados = request.get_json()
+        
+        if not dados or 'tipo_espuma_id' not in dados:
+            return jsonify({'alertas': [], 'recomendacao': ''})
+
+        tipo_espuma_id = dados.get('tipo_espuma_id')
+        altura_atual = dados.get('altura')
+        componentes_input = dados.get('componentes', {})
+
+        # =================================================================
+        # 🔍 1. Busca histórico de produções do mesmo tipo de espuma
+        # =================================================================
+        # Encontra o nome do tipo de espuma baseado no ID
+        tipo_espuma = TipoEspuma.query.get(tipo_espuma_id)
+        if not tipo_espuma:
+            return jsonify({'alertas': [], 'recomendacao': ''})
+
+        # Busca últimas 50 produções deste tipo
+        historico = Producao.query\
+            .filter_by(tipo_espuma=tipo_espuma.nome)\
+            .order_by(Producao.data_producao.desc())\
+            .limit(50)\
+            .all()
+
+        if len(historico) < 5:
+            return jsonify({
+                'alertas': [{
+                    'severidade': 'info',
+                    'mensagem': f'ℹ️ Apenas {len(historico)} produções anteriores deste tipo. Histórico limitado para análise.'
+                }],
+                'recomendacao': 'Continue produzindo para construir base de dados histórica.'
+            })
+
+        # =================================================================
+        # 📊 2. Monta dados históricos
+        # =================================================================
+        registros_historicos = []
+        
+        for producao in historico:
+            # Pega componentes usados nesta produção
+            componentes_producao = ComponenteProducao.query.filter_by(producao_id=producao.id).all()
+            
+            registro = {
+                'altura': producao.altura,
+                'data': producao.data_producao
+            }
+            
+            # Adiciona cada componente como coluna
+            for cp in componentes_producao:
+                registro[f'componente_{cp.componente_id}'] = cp.quantidade_usada
+            
+            registros_historicos.append(registro)
+
+        # =================================================================
+        # ⚠️ 3. Análises e Detecção de Anomalias
+        # =================================================================
+        alertas = []
+
+        # -----------------------------------------------------------------
+        # Análise 3.1: Altura do bloco fora do padrão
+        # -----------------------------------------------------------------
+        if altura_atual and any('altura' in r for r in registros_historicos):
+            alturas_hist = [r['altura'] for r in registros_historicos if r.get('altura')]
+            if alturas_hist:
+                media_altura = sum(alturas_hist) / len(alturas_hist)
+                desvio_altura = ((altura_atual / media_altura) - 1) * 100
+                
+                if abs(desvio_altura) > 10:
+                    severidade = 'critico' if abs(desvio_altura) > 15 else 'alerta'
+                    alertas.append({
+                        'severidade': severidade,
+                        'mensagem': f'Altura {altura_atual}cm ({desvio_altura:+.1f}% vs média {media_altura:.1f}cm) → risco de variação de densidade'
+                    })
+
+        # -----------------------------------------------------------------
+        # Análise 3.2: Componentes fora da faixa histórica
+        # -----------------------------------------------------------------
+        for comp_key, valor_atual in componentes_input.items():
+            # Ex: comp_key = "componente_5", extraímos o ID 5
+            try:
+                comp_id = int(comp_key.replace('componente_', ''))
+                componente_nome = Componente.query.get(comp_id).nome if Componente.query.get(comp_id) else f'ID {comp_id}'
+            except:
+                continue
+
+            # Coleta valores históricos deste componente
+            valores_hist = [
+                r.get(comp_key) for r in registros_historicos if r.get(comp_key) is not None
+            ]
+
+            if len(valores_hist) >= 3 and valor_atual > 0:
+                media_hist = sum(valores_hist) / len(valores_hist)
+                desvio_percent = ((valor_atual / media_hist) - 1) * 100
+                
+                # Define thresholds baseados no componente
+                if 'água' in componente_nome.lower() or 'water' in componente_nome.lower() or 'agua' in componente_nome.lower():
+                    # Água é crítica - tolerância menor
+                    if abs(desvio_percent) > 12:
+                        severidade = 'critico' if abs(desvio_percent) > 20 else 'alerta'
+                        alertas.append({
+                            'severidade': severidade,
+                            'mensagem': f'{componente_nome}: {valor_atual:.2f}kg ({desvio_percent:+.1f}% vs {media_hist:.2f}kg) → pode afetar densidade final'
+                        })
+                else:
+                    # Outros componentes
+                    if abs(desvio_percent) > 15:
+                        severidade = 'alerta' if abs(desvio_percent) < 25 else 'critico'
+                        alertas.append({
+                            'severidade': severidade,
+                            'mensagem': f'{componente_nome}: {valor_atual:.2f}kg ({desvio_percent:+.1f}% vs histórico)'
+                        })
+
+        # -----------------------------------------------------------------
+        # Análise 3.3: Relação Água/Políol (se ambos presentes)
+        # -----------------------------------------------------------------
+        agua_key = None
+        poliol_key = None
+        
+        # Identifica quais são água e poliol pelos nomes
+        for comp_key in componentes_input.keys():
+            try:
+                comp_id = int(comp_key.replace('componente_', ''))
+                comp_nome = Componente.query.get(comp_id).nome.lower()
+                
+                if 'água' in comp_nome or 'water' in comp_nome or 'agua' in comp_nome:
+                    agua_key = comp_key
+                elif 'poliol' in comp_nome or 'polyol' in comp_nome:
+                    poliol_key = comp_key
+            except:
+                continue
+
+        if agua_key and poliol_key and componentes_input.get(agua_key) and componentes_input.get(poliol_key):
+            agua_atual = componentes_input[agua_key]
+            poliol_atual = componentes_input[poliol_key]
+            relacao_atual = agua_atual / poliol_atual if poliol_atual > 0 else 0
+
+            # Calcula relação histórica média
+            relacoes_hist = []
+            for r in registros_historicos:
+                agua_hist = r.get(agua_key)
+                poliol_hist = r.get(poliol_key)
+                if agua_hist and poliol_hist and poliol_hist > 0:
+                    relacoes_hist.append(agua_hist / poliol_hist)
+
+            if len(relacoes_hist) >= 3:
+                media_relacao = sum(relacoes_hist) / len(relacoes_hist)
+                desvio_relacao = ((relacao_atual / media_relacao) - 1) * 100
+                
+                if abs(desvio_relacao) > 10:
+                    alertas.append({
+                        'severidade': 'alerta',
+                        'mensagem': f'Relação Água/Políol {relacao_atual:.3f} ({desvio_relacao:+.1f}% vs {media_relacao:.3f}) → pode afetar tamanho da célula'
+                    })
+
+        # -----------------------------------------------------------------
+        # Análise 3.4: Produções não conformes no histórico (correlação)
+        # -----------------------------------------------------------------
+        nao_conformes = [p for p in historico if p.conformidade == 'Não Conforme']
+        if len(nao_conformes) > 0:
+            taxa_nao_conforme = (len(nao_conformes) / len(historico)) * 100
+            
+            if taxa_nao_conforme > 15:  # Mais de 15% de não conformidades
+                alertas.append({
+                    'severidade': 'alerta',
+                    'mensagem': f'⚠️ {taxa_nao_conforme:.0f}% das últimas produções deste tipo foram Não Conformes'
+                })
+
+        # =================================================================
+        # 💡 4. Gera Recomendação Contextual
+        # =================================================================
+        recomendacao = ''
+        
+        if any(a['severidade'] == 'critico' for a in alertas):
+            recomendacao = '🔴 Recomendado: consultar técnico antes de iniciar a batida'
+        elif len(alertas) >= 2:
+            recomendacao = '🟡 Dica: revise os parâmetros ou faça ajuste gradual para manter estabilidade'
+        elif alertas:
+            recomendacao = 'ℹ️ Valores ligeiramente fora do padrão. Monitorar resultado final.'
+        else:
+            recomendacao = '✅ Formulação dentro dos parâmetros históricos'
+
+        return jsonify({
+            'alertas': alertas,
+            'recomendacao': recomendacao,
+            'base_historica': len(historico)
+        })   
 
 
 
