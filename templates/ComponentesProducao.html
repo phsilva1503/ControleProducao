@@ -1,76 +1,90 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Componentes da Produção</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-50 font-sans">
 
-  <div class="container mx-auto mt-8 p-4">
-    <!-- Botão de voltar -->
+  <div class="container mx-auto px-4 py-8">
+    <!-- Botão de Voltar -->
     <a href="{{ url_for('controle_producao') }}" 
-       class="inline-block mb-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-       Voltar
+       class="inline-flex items-center gap-2 mb-6 text-gray-700 hover:text-gray-900 transition-colors">
+      <i class="fas fa-arrow-left"></i>
+      Voltar
     </a>
 
     <!-- Card da Produção -->
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-lg font-semibold mb-4 text-blue-600">
-        Produção {{ producao.producao_id }} (ID: {{ producao.id }})
-      </h2>
-
-      <!-- Informações da Produção -->
-      <p class="mb-2">
-        Data: <strong>{{ producao.data_producao.strftime('%d/%m/%Y') }}</strong> | 
-        Densidade: <strong>{{ producao.densidade_real }}</strong> kg/m³ | 
-        Altura: <strong>{{ producao.altura }}</strong> cm  
-        Conformidade: <strong>{{ producao.conformidade }}</strong>
-        
-      </p>
-      <p class="mb-4">
-       Tipo Espuma: <strong>{{ producao.tipo_espuma }}</strong> | 
-       Observações: <strong>{{ producao.observacoes or '-' }}</strong>
-      </p>
-
-      <div class="card mt-3">
-          <div class="card-header">
-              <strong>Observações</strong>
-          </div>
-          <div class="card-body">
-              <p class="mb-0" style="white-space: pre-wrap;">
-                  {{ producao.observacoes or 'Nenhuma observação registrada.' }}
-              </p>
-          </div>
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <!-- Cabeçalho -->
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4">
+        <h1 class="text-xl font-bold text-white">
+          Produção <span class="font-mono">{{ producao.producao_id }}</span>
+          <span class="text-blue-200 text-sm ml-2">(ID: {{ producao.id }})</span>
+        </h1>
       </div>
 
-      <!-- Tabela de Componentes -->
-      <div class="overflow-x-auto">
-        <table class="min-w-full border border-gray-200 rounded-lg">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="px-4 py-2 text-left">ID Componente</th>
-              <th class="px-4 py-2 text-left">Componente</th>
-              <th class="px-4 py-2 text-left">Quantidade Usada</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for cp in componentes if cp.quantidade_usada > 0 %}
-              <tr class="border-t">
-                <td class="px-4 py-2">{{ cp.componente.id }}</td>
-                <td class="px-4 py-2">{{ cp.componente.nome }}</td>
-                <td class="px-4 py-2">{{ cp.quantidade_usada }}</td>
-               
-              </tr>
-            {% else %}
+      <!-- Corpo Principal -->
+      <div class="p-6">
+        <!-- Informações da Produção -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600">Data da Produção</p>
+            <p class="font-semibold">{{ producao.data_producao.strftime('%d/%m/%Y') }}</p>
+          </div>
+          <div class="bg-green-50 p-4 rounded-lg">
+             <p class="text-sm text-gray-600">Cor</p>
+             <p class="font-semibold">{{ producao.cor }}</p>
+          </div>
+          <div class="bg-amber-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600">Altura</p>
+            <p class="font-semibold">{{ producao.altura }} cm</p>
+          </div>
+          <div class="bg-purple-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600">Conformidade</p>
+            <p class="font-semibold">{{ producao.conformidade }}</p>
+          </div>
+        </div>
+
+        <!-- Observações -->
+        <div class="mb-8">
+          <p class="text-gray-700">
+            <span class="font-medium">Observações:</span>
+            <span class="ml-1">{{ producao.observacoes or '—' }}</span>
+          </p>
+        </div>
+
+        <!-- Tabela de Componentes -->
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Componentes Utilizados</h2>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-100">
               <tr>
-                <td colspan="2" class="px-4 py-2 text-center text-gray-500">
-                  Nenhum componente utilizado nesta produção.
-                </td>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Componente</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Quantidade Usada</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for cp in componentes if cp.quantidade_usada > 0 %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-4 py-3 text-sm font-mono text-gray-700">{{ cp.componente.id }}</td>
+                  <td class="px-4 py-3 text-sm font-medium text-gray-800">{{ cp.componente.nome }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-700">{{ cp.quantidade_usada }}</td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="3" class="px-4 py-6 text-center text-gray-500 italic">
+                    Nenhum componente utilizado nesta produção.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

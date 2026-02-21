@@ -235,7 +235,6 @@
           <li class="nav-item"><a class="nav-link" href="{{url_for('controle_producao')}}">Controle de Produção</a></li>
           <li class="nav-item"><a class="nav-link" href="{{url_for('lean_six_sigma')}}">Lean Six Sigma</a></li>
           <li class="nav-item"><a class="nav-link" href= "{{url_for('analise_preditiva')}}">Análise Preditiva</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{url_for('dashboard')}}">Dashboard</a></li>
         </ul>
       </div>
     </div>
@@ -251,7 +250,7 @@
       <div class="col-12">
         <div class="upload-container" id="upload-area">
           <i class="bi bi-file-earmark-spreadsheet" style="font-size: 48px; color: #3b82f6;"></i>
-          <h5 class="mt-3">Carregue sua planilha de assistência técnica</h5>
+          <h5 class="mt-3">Carregue a planilha de assistência técnica retirada do Sankhya</h5>
           <p class="upload-info">Arquivo suportado: .xlsx (Excel)</p>
           <input type="file" id="file-input" accept=".xlsx" style="display: none;">
           <button class="upload-btn" id="upload-btn">Selecionar Arquivo</button>
@@ -274,10 +273,38 @@
             <a class="nav-link" href="#implementar">🚀 Melhorar</a>
             <a class="nav-link" href="#controlar">📉 Controlar</a>
           </div>
-          <hr>
-          <p class="text-muted small"><i class="bi bi-info-circle"></i> Informações Técnicas</p>
-          <button class="btn btn-light w-100 mb-2" onclick="alert('Guia DMAIC: ISO 13053 | ASQ')">Guia DMAIC</button>
-          <button class="btn btn-light w-100" id="export-btn">Exportar Relatório DMAIC</button>
+            <hr>
+  <p class="text-muted small"><i class="bi bi-info-circle"></i> Recursos Oficiais</p>
+
+  <!-- Botão principal - ASQ -->
+  <a href="https://asq.org/quality-resources/six-sigma" 
+     target="_blank" 
+     rel="noopener noreferrer"
+     class="btn btn-primary w-100 mb-2 text-white text-start">
+     <i class="bi bi-book me-2"></i>Guia DMAIC Oficial - ASQ
+  </a>
+
+  <!-- Links secundários -->
+  <a href="https://www.iso.org/standard/54081.html" 
+     target="_blank" 
+     rel="noopener noreferrer"
+     class="btn btn-light w-100 mb-2 text-start">
+     <i class="bi bi-file-earmark-text me-2"></i>Norma ISO 13053
+  </a>
+
+  <a href="https://www.isixsigma.com/" 
+     target="_blank" 
+     rel="noopener noreferrer"
+     class="btn btn-light w-100 mb-2 text-start">
+     <i class="bi bi-globe me-2"></i>Comunidade iSixSigma
+  </a>
+
+  <a href="https://www.lean.org/" 
+     target="_blank" 
+     rel="noopener noreferrer"
+     class="btn btn-light w-100 mb-2 text-start">
+     <i class="bi bi-tools me-2"></i>Lean Enterprise Institute
+  </a>
         </div>
       </div>
 
