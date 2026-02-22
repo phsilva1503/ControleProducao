@@ -31,6 +31,7 @@ class Producao(db.Model):
     observacoes = db.Column(db.Text)
     altura = db.Column(db.Float, nullable=True, default=0.0)
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"), nullable=False)
+    status = db.Column(db.String(20), nullable=True, default="A")  # Novo campo para status da produção
 
     usuario = db.relationship("Usuario", back_populates="producoes")
 
