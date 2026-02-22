@@ -30,6 +30,7 @@
                         <th>Quantidade (kg)</th>
                         <th>Data</th>
                         <th>Produção</th>
+                        <th>Observação</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,7 +52,8 @@
 
                         <td>{{ mov.data.strftime('%d/%m/%Y') if mov.data else '-' }}</td>
 
-                        <td>{{ mov.producao_id if mov.producao_id else '-' }}</td>
+                        <td>{{ mov.producao_id if mov.producao_id else '-' }}</td> 
+                        <td>{{ mov.observacao if mov.observacao else '-' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
