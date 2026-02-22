@@ -118,6 +118,7 @@ def routes(app):
             try:
                 quantidade = float(request.form.get("quantidade", 0))
                 tipo = request.form.get("tipo")
+                observacao = request.form.get("observacao", "").strip()
 
                 if quantidade <= 0 or tipo not in ["entrada", "saida"]:
                     flash("Informe uma quantidade válida e um tipo de ajuste!", "danger")
@@ -140,7 +141,8 @@ def routes(app):
                     componente_id=componente.id,
                     quantidade=quantidade,
                     tipo=tipo,
-                    data=date.today()
+                    data=date.today(),
+                    observacao=observacao if observacao else None
                 )
                 db.session.add(mov)
                 db.session.commit()

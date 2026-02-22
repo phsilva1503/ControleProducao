@@ -61,9 +61,9 @@ class Movimentacao(db.Model):
     quantidade = db.Column(db.Float, nullable=False)
     data = db.Column(db.Date, default=date.today, nullable=False)
     producao_id = db.Column(db.Integer, db.ForeignKey("producao.id"), nullable=True)
-
     componente = db.relationship("Componente", backref="movimentacoes")
     producao = db.relationship("Producao", backref="movimentacoes")
+    observacao = db.Column(db.Text, nullable=True, default=None)
 
     def __repr__(self):
         return f"<Movimentacao Componente={self.componente_id}, Tipo={self.tipo}, Qtd={self.quantidade}, Data={self.data}>"
