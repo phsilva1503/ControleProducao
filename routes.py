@@ -197,7 +197,9 @@ def routes(app):
     @login_required
     def controle_producao():
         ##producoes = Producao.query.all()
-        producoes = Producao.query.order_by(Producao.id.desc()).all()
+        ##producoes = Producao.query.order_by(Producao.id.desc()).all()
+
+        producoes = Producao.query.filter(Producao.status != "C").order_by(Producao.id.desc()).all()##aqui lista as produções talkey?
         componentes = Componente.query.filter_by(ativo=True).all()
         fichas = FichaTecnica.query.all()
         hoje = date.today().strftime('%Y-%m-%d')
@@ -218,6 +220,46 @@ def routes(app):
                                tipos_espuma=tipos_espuma
                         
         )
+    
+    #-----------------------
+    # Cancelar Produção (status 'C' para cancelada)
+    #-----------------------
+    @app.route('/producao/<int:producao_id>/cancelar', methods=['POST'])
+    @login_required
+    def cancelar_producao(producao_id):
+        producao = Producao.query.get_or_404(producao_id)
+
+        if producao.status == 'C':  # já cancelada
+            flash(f"A produção {producao.producao_id} já está cancelada.", "info")
+            return redirect(url_for('controle_producao'))
+
+        # Percorre todos os componentes usados na produção
+        for cp in producao.componentes:
+            # Atualiza o estoque do componente
+            estoque = Estoque.query.filter_by(componente_id=cp.componente_id).first()
+            if estoque:
+                estoque.quantidade += cp.quantidade_usada
+            else:
+                # Se não houver estoque, cria um registro
+                estoque = Estoque(componente_id=cp.componente_id, quantidade=cp.quantidade_usada)
+                db.session.add(estoque)
+
+            # Cria movimentação de entrada para registrar devolução
+            movimentacao = Movimentacao(
+                componente_id=cp.componente_id,
+                tipo='entrada',
+                quantidade=cp.quantidade_usada,
+                producao_id=producao.id,
+                observacao=f"Devolução por cancelamento da produção {producao.producao_id}"
+            )
+            db.session.add(movimentacao)
+
+        # Marca a produção como cancelada
+        producao.status = 'C'
+        db.session.commit()
+
+        flash(f"Produção {producao.producao_id} cancelada com sucesso! Componentes devolvidos ao estoque.", "success")
+        return redirect(url_for('controle_producao'))
     
 # -----------------------
 # Cadastro de Produção
