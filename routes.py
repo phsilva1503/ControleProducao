@@ -5,8 +5,7 @@ from sqlalchemy import func, case,distinct
 from flask import jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-
-##from models import Componente, Estoque, Movimentacao, Producao, ComponenteProducao
+from models import Componente, Estoque, Movimentacao, Producao, ComponenteProducao
 
 
 def routes(app):
@@ -942,21 +941,105 @@ def routes(app):
     def analise_preditiva():
         return render_template('analise_preditiva.html')
 
-    @app.route('/dashboard')
+   
+
+    
+
+    
+
+    @app.route("/dashboard")
     def dashboard():
-         # Pega todas as produções, do mais recente para o mais antigo
-        producoes = Producao.query.order_by(Producao.id.desc()).all()
-    
-    # Também pode pegar componentes ativos, se quiser mostrar info extra
-        componentes = Componente.query.filter_by(ativo=True).all()
-    
-    # Passa os dados para o template
-        return render_template(
-        'dashboard.html',
-        producoes=producoes,
-        componentes=componentes
+        # Datas do filtro
+        data_inicio = request.args.get("data_inicio")
+        data_fim = request.args.get("data_fim")
+
+        data_inicio = datetime.strptime(data_inicio, "%Y-%m-%d").date() if data_inicio else None
+        data_fim = datetime.strptime(data_fim, "%Y-%m-%d").date() if data_fim else None
+
+        # Query base de produções não canceladas
+        query = Producao.query.filter(Producao.status != "C")
+        if data_inicio:
+            query = query.filter(Producao.data_producao >= data_inicio)
+        if data_fim:
+            query = query.filter(Producao.data_producao <= data_fim)
+        producoes = query.order_by(Producao.data_producao).all()
+
+        # CARD: total de produções no período
+        total_producoes = len(producoes)
+
+        # CARD: total de tipos de espuma distintos usados
+        tipos_distintos = db.session.query(Producao.tipo_espuma).filter(
+            Producao.status != "C"
         )
-        return render_template('dashboard.html')
+        if data_inicio:
+            tipos_distintos = tipos_distintos.filter(Producao.data_producao >= data_inicio)
+        if data_fim:
+            tipos_distintos = tipos_distintos.filter(Producao.data_producao <= data_fim)
+        tipos_distintos = tipos_distintos.distinct().count()
+
+        # CARD: total de componentes usados no período
+        total_componentes = db.session.query(
+            func.sum(ComponenteProducao.quantidade_usada)
+        ).join(Producao).filter(Producao.status != "C")
+        if data_inicio:
+            total_componentes = total_componentes.filter(Producao.data_producao >= data_inicio)
+        if data_fim:
+            total_componentes = total_componentes.filter(Producao.data_producao <= data_fim)
+        total_componentes = total_componentes.scalar() or 0
+
+        # HISTÓRICO DIÁRIO: produção por dia
+        historico = db.session.query(
+            Producao.data_producao,
+            func.count(Producao.id)
+        ).filter(Producao.status != "C")
+        if data_inicio:
+            historico = historico.filter(Producao.data_producao >= data_inicio)
+        if data_fim:
+            historico = historico.filter(Producao.data_producao <= data_fim)
+        historico = historico.group_by(Producao.data_producao).order_by(Producao.data_producao).all()
+        datas = [h[0].strftime("%d/%m/%Y") for h in historico]
+        totais_dia = [h[1] for h in historico]
+
+        # PRODUÇÃO POR TIPO DE ESPUMA
+        tipos_query = db.session.query(
+            Producao.tipo_espuma,
+            func.count(Producao.id)
+        ).filter(Producao.status != "C")
+        if data_inicio:
+            tipos_query = tipos_query.filter(Producao.data_producao >= data_inicio)
+        if data_fim:
+            tipos_query = tipos_query.filter(Producao.data_producao <= data_fim)
+        tipos_query = tipos_query.group_by(Producao.tipo_espuma).all()
+        tipos = [t[0] for t in tipos_query]
+        totais_tipo = [t[1] for t in tipos_query]
+
+        # COMPONENTES USADOS
+        componentes_query = db.session.query(
+            ComponenteProducao.componente_id,
+            func.sum(ComponenteProducao.quantidade_usada)
+        ).join(Producao).filter(Producao.status != "C")
+        if data_inicio:
+            componentes_query = componentes_query.filter(Producao.data_producao >= data_inicio)
+        if data_fim:
+            componentes_query = componentes_query.filter(Producao.data_producao <= data_fim)
+        componentes_query = componentes_query.group_by(ComponenteProducao.componente_id).all()
+        nomes_componentes = [db.session.get(Componente, c[0]).nome for c in componentes_query]
+        totais_componentes = [c[1] for c in componentes_query]
+
+        return render_template(
+            "dashboard.html",
+            datas=datas,
+            totais_dia=totais_dia,
+            tipos=tipos,
+            totais_tipo=totais_tipo,
+            nomes_componentes=nomes_componentes,
+            totais_componentes=totais_componentes,
+            total_producoes=total_producoes,
+            tipos_distintos=tipos_distintos,
+            total_componentes=total_componentes,
+            data_inicio=data_inicio,
+            data_fim=data_fim
+        )
 
     @app.route('/relatorios')
     def relatorios():
